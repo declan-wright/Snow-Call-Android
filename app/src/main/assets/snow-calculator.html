@@ -1,0 +1,1423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Snow Day Calculator</title>
+    <link rel="stylesheet" href="https://use.typekit.net/ptq8jqe.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" />
+    <style>
+        /*----------------------------------------------------
+          CSS Variables for Light & Dark Modes
+        ----------------------------------------------------*/
+        :root {
+          --body-bg: #f0efe7;
+          --box-bg: #ffffff;
+          --heading-text: #3d3929;
+          --non-heading-text: #98958e;
+          --accent-color: #da7c5d;
+          --accent-hover-color: #c06548;
+          --border-color: #e0e0e0;
+          --gauge-bg: #e0e0e0;
+          --card-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+          --snowflake-color: rgba(0, 0, 0, 0.1);
+          --status-bar-bg: rgba(240, 239, 231, 0.9);
+          --settings-sheet-bg: rgba(245, 245, 245, 0.98);
+          --settings-item-bg: rgba(255, 255, 255, 0.7);
+          --settings-overlay: rgba(0, 0, 0, 0.4);
+          --switch-track-off: #e0e0e0;
+          --switch-track-on: #e7beae;
+          --switch-thumb-off: #ffffff;
+          --switch-thumb-on: #da7c5d;
+          --ripple-color: rgba(218, 124, 93, 0.12);
+          --elevation-1: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.14);
+          --elevation-2: 0 3px 6px rgba(0, 0, 0, 0.15), 0 2px 4px rgba(0, 0, 0, 0.12);
+          --elevation-4: 0 10px 15px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05);
+          --font-family: 'Roboto', -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+        }
+
+        body.dark-mode {
+          --body-bg: #272726;
+          --box-bg: #3e3d3a;
+          --heading-text: #e2e2df;
+          --non-heading-text: #98958e;
+          --accent-color: #da7c5d;
+          --accent-hover-color: #c06548;
+          --border-color: #444;
+          --gauge-bg: #444;
+          --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.2), 0 1px 2px rgba(0, 0, 0, 0.12);
+          --snowflake-color: rgba(255, 255, 255, 0.5);
+          --status-bar-bg: rgba(39, 39, 38, 0.9);
+          --settings-sheet-bg: rgba(62, 61, 58, 0.98);
+          --settings-item-bg: rgba(80, 80, 75, 0.5);
+          --settings-overlay: rgba(0, 0, 0, 0.7);
+          --switch-track-off: #555;
+          --switch-track-on: #8c5a4a;
+          --ripple-color: rgba(218, 124, 93, 0.2);
+        }
+
+        /*----------------------------------------------------
+          Global Styles & Reset
+        ----------------------------------------------------*/
+        * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+          -webkit-tap-highlight-color: transparent;
+        }
+
+        html {
+          height: -webkit-fill-available;
+          font-family: var(--font-family);
+        }
+
+        body {
+          min-height: 100vh;
+          min-height: -webkit-fill-available;
+          background-color: var(--body-bg);
+          color: var(--heading-text);
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          transition: background-color 0.25s ease, color 0.25s ease;
+          padding: env(safe-area-inset-top, 20px) 16px env(safe-area-inset-bottom, 20px) 16px;
+          opacity: 0;
+          animation: fadeIn 0.8s ease-out forwards 0.2s;
+          position: relative;
+          overflow-x: hidden;
+        }
+
+        @keyframes fadeIn {
+          to { opacity: 1; }
+        }
+
+        /*----------------------------------------------------
+          Status Bar Styling
+        ----------------------------------------------------*/
+        #status-bar {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          height: env(safe-area-inset-top, 20px);
+          background-color: var(--status-bar-bg);
+          z-index: 1000;
+          backdrop-filter: blur(10px);
+          -webkit-backdrop-filter: blur(10px);
+          transition: background-color 0.25s ease;
+        }
+
+        /*----------------------------------------------------
+          App Header & Typography
+        ----------------------------------------------------*/
+        .app-header {
+          width: 100%;
+          text-align: center;
+          margin-bottom: 20px;
+          transform: translateY(-10px);
+          opacity: 0;
+          animation: slideDown 0.8s ease-out forwards 0.4s;
+        }
+
+        @keyframes slideDown {
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        h1 {
+          font-family: var(--font-family);
+          font-size: 1.75rem;
+          font-weight: 700;
+          color: var(--heading-text);
+          letter-spacing: -0.5px;
+          margin-bottom: 4px;
+          padding: 0 10px;
+        }
+
+        #subheading {
+          font-size: 0.875rem;
+          color: var(--non-heading-text);
+          font-style: italic;
+          margin-bottom: 8px;
+          opacity: 0;
+          animation: fadeIn 0.8s ease-out forwards 0.6s;
+        }
+
+        #dateDisplay {
+          background-color: var(--box-bg);
+          border-radius: 8px;
+          padding: 12px 20px;
+          width: 100%;
+          max-width: 300px;
+          margin: 0 auto 16px;
+          font-size: 0.95rem;
+          font-weight: 500;
+          color: var(--heading-text);
+          box-shadow: var(--elevation-1);
+          text-align: center;
+          transform: scale(0.95);
+          opacity: 0;
+          transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        #dateDisplay.show {
+          opacity: 1;
+          transform: scale(1);
+        }
+
+        /*----------------------------------------------------
+          Button Styling
+        ----------------------------------------------------*/
+        #calculateButton {
+          width: 100%;
+          max-width: 300px;
+          padding: 14px 16px;
+          border-radius: 8px;
+          background-color: var(--accent-color);
+          color: white;
+          font-size: 0.95rem;
+          font-weight: 500;
+          border: none;
+          box-shadow: var(--elevation-1);
+          margin-bottom: 24px;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          -webkit-appearance: none;
+          position: relative;
+          overflow: hidden;
+        }
+
+        #calculateButton::after {
+          content: "";
+          display: block;
+          position: absolute;
+          width: 100%;
+          height: 100%;
+          top: 0;
+          left: 0;
+          pointer-events: none;
+          background-image: radial-gradient(circle, #fff 10%, transparent 10.01%);
+          background-repeat: no-repeat;
+          background-position: 50%;
+          transform: scale(10, 10);
+          opacity: 0;
+          transition: transform 0.4s, opacity 0.8s;
+        }
+
+        #calculateButton:active::after {
+          transform: scale(0, 0);
+          opacity: 0.3;
+          transition: 0s;
+        }
+
+        #calculateButton:active {
+          transform: scale(0.98);
+          box-shadow: var(--elevation-1);
+        }
+
+        #calculateButton.analyzing {
+          animation: pulse 1.5s infinite alternate;
+          pointer-events: none;
+        }
+
+        @keyframes pulse {
+          from { opacity: 1; transform: scale(1); }
+          to { opacity: 0.9; transform: scale(0.99); }
+        }
+
+        /*----------------------------------------------------
+          Card Components
+        ----------------------------------------------------*/
+        .card {
+          width: 100%;
+          max-width: 500px;
+          background-color: var(--box-bg);
+          border-radius: 8px;
+          padding: 20px;
+          margin-bottom: 16px;
+          box-shadow: var(--elevation-1);
+          transform: translateY(20px);
+          opacity: 0;
+          transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+          overflow: hidden;
+        }
+
+        .card.show {
+          transform: translateY(0);
+          opacity: 1;
+        }
+
+        .card h2 {
+          font-size: 1.125rem;
+          font-weight: 700;
+          color: var(--heading-text);
+          margin-bottom: 16px;
+          text-align: center;
+        }
+
+        /*----------------------------------------------------
+          Weather Conditions Layout
+        ----------------------------------------------------*/
+        .conditions {
+          display: flex;
+          justify-content: space-around;
+          align-items: center;
+          gap: 8px;
+        }
+
+        .condition-group {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          padding: 12px 8px;
+          background-color: rgba(0, 0, 0, 0.02);
+          border-radius: 8px;
+          transition: transform 0.2s ease;
+          position: relative;
+          overflow: hidden;
+        }
+
+        body.dark-mode .condition-group {
+          background-color: rgba(255, 255, 255, 0.03);
+        }
+
+        .condition-group::after {
+          content: "";
+          display: block;
+          position: absolute;
+          width: 100%;
+          height: 100%;
+          top: 0;
+          left: 0;
+          pointer-events: none;
+          background-image: radial-gradient(circle, var(--ripple-color) 10%, transparent 10.01%);
+          background-repeat: no-repeat;
+          background-position: 50%;
+          transform: scale(10, 10);
+          opacity: 0;
+          transition: transform 0.4s, opacity 0.8s;
+        }
+
+        .condition-group:active::after {
+          transform: scale(0, 0);
+          opacity: 0.6;
+          transition: 0s;
+        }
+
+        .condition-group:active {
+          transform: scale(0.98);
+        }
+
+        .condition-group .material-icons-round {
+          font-size: 1.75rem;
+          color: var(--accent-color);
+          margin-bottom: 8px;
+        }
+
+        .data-value {
+          font-size: 1.25rem;
+          font-weight: 500;
+          color: var(--heading-text);
+          margin-bottom: 4px;
+        }
+
+        .condition-label {
+          font-size: 0.8rem;
+          color: var(--non-heading-text);
+          text-align: center;
+        }
+
+        /*----------------------------------------------------
+          Prediction Gauge
+        ----------------------------------------------------*/
+        #gauge {
+          position: relative;
+          width: 100%;
+          height: 36px;
+          background: var(--gauge-bg);
+          border-radius: 8px;
+          overflow: hidden;
+          margin-bottom: 20px;
+          box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        #gauge-fill {
+          position: absolute;
+          top: 0;
+          left: 0;
+          height: 100%;
+          width: 0;
+          background: linear-gradient(90deg, var(--accent-color), #e87e55);
+          border-radius: 8px;
+          transition: width 2.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        #gauge-text {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-weight: 700;
+          font-size: 1rem;
+          color: var(--heading-text);
+          z-index: 1;
+          text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .prediction-result {
+          text-align: center;
+          padding: 16px;
+          background-color: rgba(0, 0, 0, 0.02);
+          border-radius: 8px;
+        }
+
+        body.dark-mode .prediction-result {
+          background-color: rgba(255, 255, 255, 0.03);
+        }
+
+        .prediction-header {
+          font-size: 0.95rem;
+          font-weight: 600;
+          color: var(--heading-text);
+          margin-bottom: 8px;
+        }
+
+        .prediction-description {
+          font-size: 0.875rem;
+          color: var(--non-heading-text);
+          line-height: 1.4;
+        }
+
+        /*----------------------------------------------------
+          Bottom Section
+        ----------------------------------------------------*/
+        #bottomSection {
+          width: 100%;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          margin-top: auto;
+          padding-top: 24px;
+          margin-bottom: 60px; /* Make room for the settings button */
+          opacity: 0;
+          animation: fadeIn 1s ease-out forwards 1s;
+        }
+
+        .avatar {
+          width: 64px;
+          height: 64px;
+          border-radius: 50%;
+          object-fit: cover;
+          margin-bottom: 12px;
+          border: 2px solid var(--accent-color);
+          box-shadow: var(--elevation-1);
+        }
+
+        .footer-message {
+          font-size: 0.9rem;
+          color: var(--heading-text);
+          font-style: italic;
+          margin-bottom: 20px;
+          text-align: center;
+        }
+
+        .footer-info {
+          font-size: 0.8rem;
+          color: var(--non-heading-text);
+          text-align: center;
+          margin-bottom: 16px;
+          line-height: 1.5;
+        }
+
+        /*----------------------------------------------------
+          Settings Button
+        ----------------------------------------------------*/
+        #settingsButton {
+          position: fixed;
+          bottom: max(16px, env(safe-area-inset-bottom, 16px));
+          left: 50%;
+          transform: translateX(-50%);
+          padding: 10px 20px;
+          background-color: var(--box-bg);
+          color: var(--heading-text);
+          border: none;
+          border-radius: 8px;
+          font-size: 0.875rem;
+          font-weight: 600;
+          box-shadow: var(--elevation-2);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 6px;
+          z-index: 100;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          position: relative;
+          overflow: hidden;
+        }
+
+        #settingsButton::after {
+          content: "";
+          display: block;
+          position: absolute;
+          width: 100%;
+          height: 100%;
+          top: 0;
+          left: 0;
+          pointer-events: none;
+          background-image: radial-gradient(circle, var(--ripple-color) 10%, transparent 10.01%);
+          background-repeat: no-repeat;
+          background-position: 50%;
+          transform: scale(10, 10);
+          opacity: 0;
+          transition: transform 0.4s, opacity 0.8s;
+        }
+
+        #settingsButton:active::after {
+          transform: scale(0, 0);
+          opacity: 0.6;
+          transition: 0s;
+        }
+
+        #settingsButton:active {
+          transform: translateX(-50%) scale(0.96);
+        }
+
+        /*----------------------------------------------------
+          Settings Sheet
+        ----------------------------------------------------*/
+        #settingsOverlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background-color: var(--settings-overlay);
+          z-index: 1000;
+          opacity: 0;
+          pointer-events: none;
+          transition: opacity 0.3s ease;
+        }
+
+        #settingsOverlay.active {
+          opacity: 1;
+          pointer-events: all;
+        }
+
+        #settingsSheet {
+          position: fixed;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          background-color: var(--settings-sheet-bg);
+          border-radius: 16px 16px 0 0;
+          box-shadow: var(--elevation-4);
+          padding: 20px 16px max(20px, env(safe-area-inset-bottom, 20px)) 16px;
+          z-index: 2000;
+          transform: translateY(100%);
+          transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          backdrop-filter: blur(10px);
+          -webkit-backdrop-filter: blur(10px);
+        }
+
+        #settingsSheet.active {
+          transform: translateY(0);
+        }
+
+        /* Pull indicator */
+        #settingsSheet::before {
+          content: '';
+          position: absolute;
+          top: 8px;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 36px;
+          height: 4px;
+          background-color: var(--non-heading-text);
+          opacity: 0.3;
+          border-radius: 2px;
+        }
+
+        .settings-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 16px 8px;
+          margin-bottom: 8px;
+        }
+
+        .settings-title {
+          font-size: 1.25rem;
+          font-weight: 700;
+          color: var(--heading-text);
+        }
+
+        .settings-done {
+          background: none;
+          border: none;
+          color: var(--accent-color);
+          font-size: 0.95rem;
+          font-weight: 500;
+          cursor: pointer;
+          padding: 8px 12px;
+          border-radius: 4px;
+          position: relative;
+          overflow: hidden;
+        }
+
+        .settings-done::after {
+          content: "";
+          display: block;
+          position: absolute;
+          width: 100%;
+          height: 100%;
+          top: 0;
+          left: 0;
+          pointer-events: none;
+          background-image: radial-gradient(circle, var(--ripple-color) 10%, transparent 10.01%);
+          background-repeat: no-repeat;
+          background-position: 50%;
+          transform: scale(10, 10);
+          opacity: 0;
+          transition: transform 0.4s, opacity 0.8s;
+        }
+
+        .settings-done:active::after {
+          transform: scale(0, 0);
+          opacity: 0.6;
+          transition: 0s;
+        }
+
+        .settings-section {
+          margin-bottom: 24px;
+        }
+
+        .settings-section-header {
+          text-transform: uppercase;
+          font-size: 0.75rem;
+          font-weight: 500;
+          color: var(--non-heading-text);
+          margin-bottom: 8px;
+          padding: 0 8px;
+          letter-spacing: 0.5px;
+        }
+
+        .settings-item {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 16px;
+          background-color: var(--settings-item-bg);
+          border-radius: 8px;
+          margin-bottom: 8px;
+          backdrop-filter: blur(5px);
+          -webkit-backdrop-filter: blur(5px);
+          position: relative;
+          overflow: hidden;
+          cursor: pointer;
+        }
+
+        .settings-item-title {
+          font-size: 0.95rem;
+          font-weight: 400;
+          color: var(--heading-text);
+        }
+
+        .settings-item-right {
+          display: flex;
+          align-items: center;
+        }
+
+        .settings-version {
+          font-size: 0.95rem;
+          font-weight: 400;
+          color: var(--non-heading-text);
+        }
+
+        .settings-bundle {
+          font-size: 0.875rem;
+          font-weight: 400;
+          color: var(--non-heading-text);
+        }
+
+        /*----------------------------------------------------
+          Material Design Toggle Switch
+        ----------------------------------------------------*/
+        .toggle-switch {
+          position: relative;
+          display: inline-block;
+          width: 36px;
+          height: 20px;
+        }
+
+        .toggle-switch input {
+          opacity: 0;
+          width: 0;
+          height: 0;
+        }
+
+        .toggle-slider {
+          position: absolute;
+          cursor: pointer;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background-color: var(--switch-track-off);
+          transition: .3s;
+          border-radius: 10px;
+        }
+
+        .toggle-slider:before {
+          position: absolute;
+          content: "";
+          height: 14px;
+          width: 14px;
+          left: 3px;
+          bottom: 3px;
+          background-color: var(--switch-thumb-off);
+          transition: .3s;
+          border-radius: 50%;
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+        }
+
+        input:checked + .toggle-slider {
+          background-color: var(--switch-track-on);
+        }
+
+        input:checked + .toggle-slider:before {
+          transform: translateX(16px);
+          background-color: var(--switch-thumb-on);
+        }
+
+        /*----------------------------------------------------
+          External Link Styling
+        ----------------------------------------------------*/
+        .external-link {
+          color: var(--accent-color);
+          text-decoration: none;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 24px;
+          height: 24px;
+        }
+
+        /*----------------------------------------------------
+          Share Button
+        ----------------------------------------------------*/
+        .share-button {
+          color: var(--accent-color);
+          background: none;
+          border: none;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          font-size: 1.4rem;
+          position: relative;
+          overflow: hidden;
+          width: 40px;
+          height: 40px;
+          border-radius: 20px;
+        }
+
+        .share-button::after {
+          content: "";
+          display: block;
+          position: absolute;
+          width: 100%;
+          height: 100%;
+          top: 0;
+          left: 0;
+          pointer-events: none;
+          background-image: radial-gradient(circle, var(--ripple-color) 10%, transparent 10.01%);
+          background-repeat: no-repeat;
+          background-position: 50%;
+          transform: scale(10, 10);
+          opacity: 0;
+          transition: transform 0.4s, opacity 0.8s;
+        }
+
+        .share-button:active::after {
+          transform: scale(0, 0);
+          opacity: 0.6;
+          transition: 0s;
+        }
+
+        /*----------------------------------------------------
+          Snowflakes Animation
+        ----------------------------------------------------*/
+        #snowflakes {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          pointer-events: none;
+          z-index: -1;
+          overflow: hidden;
+        }
+
+        .snowflake {
+          position: absolute;
+          width: 4px;
+          height: 4px;
+          background: var(--snowflake-color);
+          border-radius: 50%;
+          opacity: 0.7;
+          animation: snowfall linear infinite;
+        }
+
+        @keyframes snowfall {
+          0% { transform: translateY(-5vh) rotate(0deg); opacity: 0; }
+          20% { opacity: 0.7; }
+          100% { transform: translateY(105vh) rotate(360deg); opacity: 0; }
+        }
+
+        /*----------------------------------------------------
+          Loading Indicator
+        ----------------------------------------------------*/
+        .loading-spinner {
+          display: inline-block;
+          width: 18px;
+          height: 18px;
+          border: 2px solid rgba(255,255,255,0.3);
+          border-radius: 50%;
+          border-top-color: #fff;
+          animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+
+        /*----------------------------------------------------
+          Responsive Adjustments
+        ----------------------------------------------------*/
+        @media (min-width: 500px) {
+          .card {
+            padding: 24px;
+          }
+
+          h1 {
+            font-size: 2rem;
+          }
+
+          .data-value {
+            font-size: 1.4rem;
+          }
+
+          .conditions {
+            gap: 12px;
+          }
+
+          #calculateButton {
+            font-size: 1rem;
+          }
+        }
+    </style>
+</head>
+<body>
+<div id="status-bar"></div>
+<div id="snowflakes" aria-hidden="true"></div>
+
+<div class="app-header">
+    <h1> ​​​​​​​​​​​​​​​​​​​​​​​​​​​​​ </h1>
+    <h1>RSU1 SNOW CALL</h1>
+    <p id="subheading">world's most accurate</p>
+</div>
+
+<div id="dateDisplay"></div>
+
+<button id="calculateButton">
+    <span id="buttonText">Calculate Snow Day Chance</span>
+    <span id="loadingSpinner" class="loading-spinner" style="display: none;"></span>
+</button>
+
+<div id="weatherData" class="card">
+    <h2>Current Conditions</h2>
+    <div class="conditions">
+        <div class="condition-group">
+            <span class="material-icons-round">thermostat</span>
+            <span class="data-value" id="temperature"></span>
+            <span class="condition-label">Expected Temp</span>
+        </div>
+        <div class="condition-group">
+            <span class="material-icons-round">ac_unit</span>
+            <span class="data-value" id="snow"></span>
+            <span class="condition-label">Expected Snow</span>
+        </div>
+        <div class="condition-group">
+            <span class="material-icons-round">history</span>
+            <span class="data-value" id="prevSnow"></span>
+            <span class="condition-label">Previous Snow</span>
+        </div>
+    </div>
+</div>
+
+<div id="prediction" class="card">
+    <h2>Snow Day Prediction</h2>
+    <p id="predictionText">Click "Calculate" to see your snow day prediction.</p>
+</div>
+
+<div id="bottomSection">
+    <img src="https://www.pressherald.com/wp-content/uploads/sites/4/2011/04/m-bath-rsu1-superintendent-patrick-manuel.jpg" alt="Patrick Manuel" class="avatar">
+    <p class="footer-message">Please, Dr. Manuel! We need a break!</p>
+</div>
+
+<!-- Settings Button -->
+<button id="settingsButton">
+    <span class="material-icons-round">settings</span>
+    Settings
+</button>
+
+<!-- Settings Sheet Overlay -->
+<div id="settingsOverlay"></div>
+
+<!-- Settings Sheet -->
+<div id="settingsSheet">
+    <div class="settings-header">
+        <h2 class="settings-title">Settings</h2>
+        <button class="settings-done" id="closeSettings">Done</button>
+    </div>
+
+    <div class="settings-section">
+        <div class="settings-section-header">Appearance</div>
+        <div class="settings-item">
+            <div class="settings-item-title">Dark Mode</div>
+            <div class="settings-item-right">
+                <label class="toggle-switch">
+                    <input type="checkbox" id="darkModeToggle">
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <div class="settings-section">
+        <div class="settings-section-header">Share</div>
+        <div class="settings-item">
+            <div class="settings-item-title">Share Snow Day Calculator</div>
+            <div class="settings-item-right">
+                <button class="share-button" id="shareButton">
+                    <span class="material-icons-round">share</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="settings-section">
+        <div class="settings-section-header">About</div>
+        <div class="settings-item">
+            <div class="settings-item-title">Privacy Policy</div>
+            <div class="settings-item-right">
+                <a href="https://declan-wright.github.io/snowday-privacy-policy/" target="_blank" class="external-link">
+                    <span class="material-icons-round">open_in_new</span>
+                </a>
+            </div>
+        </div>
+        <div class="settings-item">
+            <div class="settings-item-title">Version</div>
+            <div class="settings-item-right">
+                <span class="settings-version">1.0.0</span>
+            </div>
+        </div>
+        <div class="settings-item">
+            <div class="settings-item-title">Bundle ID</div>
+            <div class="settings-item-right">
+                <span class="settings-bundle">com.snowdaycalculator</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Model weights from Snowday Model F2 0.912.json
+    const weights = {
+      W1: [
+        [0.41663657747586713, 0.5256001778225754, 2.1566107829165384],
+        [-0.7556965015080414, -1.7543907837051484, 0.24571689278812842],
+        [0.46303925095762705, -0.16221288582505167, -0.2893163450287195],
+        [0.8132460484584749, -0.7063328189834551, -1.857206041364893],
+        [0.8493428004272436, -0.08194846637293386, 0.2881652505650596],
+        [0.8929670284270083, -0.24857252350997114, -0.38856121748190847],
+        [0.013065484479550698, -1.5157351152575074, 0.45289147387516354],
+        [0.8079531247713924, 1.2261087544157487, 0.4851562113095939]
+      ],
+      b1: [
+        [0.003005140757832803],
+        [-0.02749235861910012],
+        [0.07267728745945415],
+        [-0.03737230554086685],
+        [0.038856390481357764],
+        [-0.0388372356576684],
+        [-0.03052688095705094],
+        [-0.008072900817557165]
+      ],
+      W2: [
+        [0.09751955264289433, -1.0467263585083966, 0.9994834833401101, -0.4255949608721677, 0.5736469822120318, -0.4420086549415937, -0.6605809275033416, 0.014654692656513325]
+      ],
+      b2: [[0.11315243401435356]]
+    };
+
+    const calibration = {
+      temperature: 1.6536551017280212,
+      optimal_threshold: 0.444443502330337
+    };
+
+    // Initialize elements
+    const calculateButton = document.getElementById("calculateButton");
+    const buttonText = document.getElementById("buttonText");
+    const loadingSpinner = document.getElementById("loadingSpinner");
+    const temperatureDisplay = document.getElementById("temperature");
+    const snowDisplay = document.getElementById("snow");
+    const prevSnowDisplay = document.getElementById("prevSnow");
+    const predictionText = document.getElementById("predictionText");
+    const dateDisplay = document.getElementById("dateDisplay");
+    const weatherDataSection = document.getElementById("weatherData");
+    const predictionSection = document.getElementById("prediction");
+    const darkModeToggle = document.getElementById("darkModeToggle");
+    const settingsButton = document.getElementById("settingsButton");
+    const settingsSheet = document.getElementById("settingsSheet");
+    const settingsOverlay = document.getElementById("settingsOverlay");
+    const closeSettings = document.getElementById("closeSettings");
+    const shareButton = document.getElementById("shareButton");
+
+    // Set coordinates for Bath, ME
+    const LAT = 43.915;
+    const LON = -69.837222;
+
+    // Initialize date display
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    dateDisplay.innerHTML = `Calculating for <strong>${formatDate(tomorrow)}</strong>`;
+    dateDisplay.classList.add("show");
+
+    // Create snowflakes
+    createSnowflakes();
+
+    // Check for saved dark mode preference
+    if (localStorage.getItem("darkMode") === "true") {
+      document.body.classList.add("dark-mode");
+      darkModeToggle.checked = true;
+    }
+
+    // Add event listeners
+    calculateButton.addEventListener("click", handleCalculateClick);
+    darkModeToggle.addEventListener("change", toggleDarkMode);
+    settingsButton.addEventListener("click", openSettings);
+    closeSettings.addEventListener("click", closeSettingsSheet);
+    settingsOverlay.addEventListener("click", closeSettingsSheet);
+    shareButton.addEventListener("click", shareApp);
+
+    // Add swipe down to close settings
+    let touchStartY = 0;
+    let touchEndY = 0;
+
+    settingsSheet.addEventListener("touchstart", function(event) {
+      touchStartY = event.touches[0].clientY;
+    }, false);
+
+    settingsSheet.addEventListener("touchmove", function(event) {
+      touchEndY = event.touches[0].clientY;
+
+      // If swiping down
+      if (touchEndY - touchStartY > 50) {
+        closeSettingsSheet();
+      }
+    }, false);
+
+    // Add haptic feedback
+    if (window.navigator && window.navigator.vibrate) {
+      const elements = document.querySelectorAll("button, .condition-group, .toggle-switch");
+      elements.forEach(el => {
+        el.addEventListener("click", () => window.navigator.vibrate(10));
+      });
+    }
+
+    // Helper functions
+    function sigmoid(z) {
+      return 1 / (1 + Math.exp(-z));
+    }
+
+    function relu(z) {
+      return Math.max(0, z);
+    }
+
+    function formatDate(date) {
+      return new Intl.DateTimeFormat("en-US", { weekday: "long", month: "short", day: "numeric" }).format(date);
+    }
+
+    function calculateMLPSnowDayProbability(snowfall, prevSnow, minTemp) {
+      const X_input = [[snowfall], [prevSnow], [minTemp]];
+      let a1 = [];
+
+      for (let i = 0; i < weights.W1.length; i++) {
+        let sum = 0;
+        for (let j = 0; j < weights.W1[0].length; j++) {
+          sum += weights.W1[i][j] * X_input[j][0];
+        }
+        a1.push([relu(sum + weights.b1[i][0])]);
+      }
+
+      let y_hat_logit = 0;
+      for (let i = 0; i < weights.W2[0].length; i++) {
+        y_hat_logit += weights.W2[0][i] * a1[i][0];
+      }
+      y_hat_logit += weights.b2[0][0];
+
+      let raw_prob = sigmoid(y_hat_logit);
+      const logit = Math.log(raw_prob / (1 - raw_prob));
+      const calibrated_prob = sigmoid(logit / calibration.temperature);
+
+      return calibrated_prob;
+    }
+
+    function calculateExpectedSnowfall(periods) {
+      let snowfallTotal = 0;
+
+      periods.forEach(period => {
+        if (period.temperature <= 32 && period.probabilityOfPrecipitation.value > 0) {
+          let tempFactor = (32 - period.temperature) / 32;
+          let snowAccumulation = (period.probabilityOfPrecipitation.value / 100) * 0.2 * (1 + tempFactor);
+          snowfallTotal += snowAccumulation;
+        }
+      });
+
+      return snowfallTotal;
+    }
+
+    function getDescriptiveText(probability) {
+      const prob = parseFloat(probability);
+
+      if (prob >= 80) {
+        return "High likelihood of a snow day tomorrow! Get ready to sleep in!";
+      } else if (prob >= 70) {
+        return "There's a decent chance! Keep an eye on those weather reports!";
+      } else if (prob >= 25) {
+        return "Don't get your hopes up too high, but there's a small chance!";
+      } else {
+        return "Sorry, but you'll be going to school tomorrow. Set your alarm.";
+      }
+    }
+
+    function createSnowflakes() {
+      const snowContainer = document.getElementById("snowflakes");
+      const snowflakeCount = Math.min(window.innerWidth / 8, 60); // Limit based on screen width
+
+      for (let i = 0; i < snowflakeCount; i++) {
+        const snowflake = document.createElement("div");
+        snowflake.classList.add("snowflake");
+        snowflake.style.left = `${Math.random() * 100}vw`;
+
+        const duration = Math.random() * 8 + 8; // Slower, more gentle falling
+        snowflake.style.animationDuration = `${duration}s`;
+        snowflake.style.animationDelay = `-${Math.random() * duration}s`;
+
+        const size = Math.random() * 4 + 2;
+        snowflake.style.width = `${size}px`;
+        snowflake.style.height = `${size}px`;
+
+        // Add slight blur for more depth
+        snowflake.style.filter = `blur(${Math.random()}px)`;
+
+        snowContainer.appendChild(snowflake);
+      }
+    }
+
+    function toggleDarkMode() {
+      document.body.classList.toggle("dark-mode");
+      const isDarkMode = document.body.classList.contains("dark-mode");
+      localStorage.setItem("darkMode", isDarkMode);
+
+      // Add haptic feedback
+      if (window.navigator && window.navigator.vibrate) {
+        window.navigator.vibrate(15);
+      }
+    }
+
+    function openSettings() {
+      settingsOverlay.classList.add("active");
+      settingsSheet.classList.add("active");
+
+      // Add haptic feedback
+      if (window.navigator && window.navigator.vibrate) {
+        window.navigator.vibrate([10, 30, 10]);
+      }
+    }
+
+    function closeSettingsSheet() {
+      settingsOverlay.classList.remove("active");
+      settingsSheet.classList.remove("active");
+
+      // Add haptic feedback
+      if (window.navigator && window.navigator.vibrate) {
+        window.navigator.vibrate(10);
+      }
+    }
+
+    function shareApp() {
+      if (navigator.share) {
+        navigator.share({
+          title: 'RSU1 Snow Day Calculator',
+          text: 'Check out this Snow Day Calculator for RSU1 schools!',
+          url: window.location.href
+        })
+        .then(() => console.log('Share successful'))
+        .catch((error) => console.log('Error sharing:', error));
+      } else {
+        alert('Web Share API not supported in your browser. Try copying the URL manually.');
+      }
+    }
+
+    function showLoading() {
+      buttonText.textContent = "Analyzing Weather";
+      loadingSpinner.style.display = "inline-block";
+      calculateButton.classList.add("analyzing");
+      weatherDataSection.classList.remove("show");
+      predictionSection.classList.remove("show");
+    }
+
+    function hideLoading() {
+      buttonText.textContent = "Calculate Snow Day Chance";
+      loadingSpinner.style.display = "none";
+      calculateButton.classList.remove("analyzing");
+    }
+
+    async function handleCalculateClick() {
+      showLoading();
+
+      // Add slight delay for visual effect
+      setTimeout(() => {
+        fetchWeatherData();
+      }, 1000);
+    }
+
+    async function fetchWeatherData() {
+      try {
+        const pointResponse = await fetch(`https://api.weather.gov/points/${LAT},${LON}`, {
+          headers: { "User-Agent": "SnowDayCalculator/1.0 (snowdaycalculator@protonmail.com)" }
+        });
+
+        if (!pointResponse.ok) {
+          throw new Error("Weather API request failed");
+        }
+
+        const pointData = await pointResponse.json();
+
+        const [forecastResponse, hourlyResponse] = await Promise.all([
+          fetch(pointData.properties.forecast, {
+            headers: { "User-Agent": "SnowDayCalculator/1.0 (snowdaycalculator@protonmail.com)" }
+          }),
+          fetch(pointData.properties.forecastHourly, {
+            headers: { "User-Agent": "SnowDayCalculator/1.0 (snowdaycalculator@protonmail.com)" }
+          })
+        ]);
+
+        if (!hourlyResponse.ok) {
+          throw new Error("Hourly forecast API request failed");
+        }
+
+        const hourlyData = await hourlyResponse.json();
+
+        // Filter tomorrow's hourly forecast
+        const tomorrowHourly = hourlyData.properties.periods.filter(period => {
+          const periodDate = new Date(period.startTime);
+          return periodDate.getDate() === tomorrow.getDate();
+        });
+
+        const minTemp = Math.min(...tomorrowHourly.map(period => period.temperature));
+        const snowfall = calculateExpectedSnowfall(tomorrowHourly);
+
+        // Calculate previous day's snow
+        const now = new Date();
+        const todayRemaining = hourlyData.properties.periods.filter(period => {
+          const periodDate = new Date(period.startTime);
+          return periodDate.getDate() === now.getDate() && periodDate.getHours() >= now.getHours();
+        });
+
+        const prevSnow = todayRemaining.reduce((acc, period) => {
+          if (period.temperature <= 32 && period.probabilityOfPrecipitation.value > 0) {
+            return acc + (period.probabilityOfPrecipitation.value / 100) * 0.1;
+          }
+          return acc;
+        }, 0);
+
+        // Update UI with weather data
+        temperatureDisplay.textContent = `${minTemp}°F`;
+        snowDisplay.textContent = `${snowfall.toFixed(1)}"`;
+        prevSnowDisplay.textContent = `${prevSnow.toFixed(1)}"`;
+
+        // Calculate snow day probability
+        let mlpProbability;
+        const threshold = 0.2;
+
+        if (snowfall < threshold && prevSnow < threshold) {
+          mlpProbability = 0;
+        } else {
+          mlpProbability = calculateMLPSnowDayProbability(snowfall, prevSnow, minTemp);
+        }
+
+        // Convert raw probability to display probability
+        let displayedProbability;
+        if (mlpProbability < calibration.optimal_threshold) {
+          displayedProbability = (mlpProbability / calibration.optimal_threshold) * 70;
+        } else {
+          displayedProbability = 70 + ((mlpProbability - calibration.optimal_threshold) / (1 - calibration.optimal_threshold)) * 30;
+        }
+
+        const probabilityPercentage = displayedProbability.toFixed(1);
+        const prediction = mlpProbability >= calibration.optimal_threshold ? "Yes" : "No";
+
+        // Show weather data section with animation
+        weatherDataSection.classList.add("show");
+
+        // Update prediction section
+        predictionText.innerHTML = `
+          <div id="gauge">
+            <div id="gauge-fill"></div>
+            <div id="gauge-text">${probabilityPercentage}%</div>
+          </div>
+          <div class="prediction-result">
+            <div class="prediction-header">Snow Day Predicted: <strong>${prediction}</strong></div>
+            <div class="prediction-description">${getDescriptiveText(probabilityPercentage)}</div>
+          </div>
+        `;
+
+        // Show prediction section with animation
+        predictionSection.classList.add("show");
+
+        // Animate gauge fill after a small delay
+        setTimeout(() => {
+          document.getElementById("gauge-fill").style.width = probabilityPercentage + "%";
+        }, 300);
+
+      } catch (error) {
+        console.error("Error fetching weather data:", error);
+
+        // Show error in prediction section
+        predictionText.innerHTML = `
+          <div style="text-align: center; padding: 20px;">
+            <span class="material-icons-round" style="font-size: 48px; color: #e57373; margin-bottom: 16px;">error_outline</span>
+            <p style="margin-bottom: 12px; font-weight: 600;">Unable to load weather data</p>
+            <p style="color: var(--non-heading-text);">Please check your connection and try again.</p>
+          </div>
+        `;
+
+        predictionSection.classList.add("show");
+      } finally {
+        hideLoading();
+      }
+    }
+
+    // Add ripple effect for interactive elements
+    document.addEventListener('DOMContentLoaded', function() {
+      // Add touch response for buttons and interactive elements
+      document.querySelectorAll('button, .condition-group, .settings-done, .settings-item').forEach(button => {
+        button.addEventListener('touchstart', createRipple);
+        button.addEventListener('mousedown', createRipple);
+      });
+
+      function createRipple(event) {
+        const button = event.currentTarget;
+
+        // Skip if the element already has an active ripple
+        if (button.querySelector('.ripple')) return;
+
+        const circle = document.createElement('span');
+        const diameter = Math.max(button.clientWidth, button.clientHeight);
+        const radius = diameter / 2;
+
+        // Get position
+        let rect = button.getBoundingClientRect();
+        let x, y;
+
+        if (event.type === 'touchstart') {
+          x = event.touches[0].clientX - rect.left;
+          y = event.touches[0].clientY - rect.top;
+        } else {
+          x = event.clientX - rect.left;
+          y = event.clientY - rect.top;
+        }
+
+        circle.style.width = circle.style.height = `${diameter}px`;
+        circle.style.left = `${x - radius}px`;
+        circle.style.top = `${y - radius}px`;
+        circle.classList.add('ripple');
+
+        // Style the ripple
+        circle.style.position = 'absolute';
+        circle.style.borderRadius = '50%';
+        circle.style.transform = 'scale(0)';
+        circle.style.animation = 'ripple 0.6s linear';
+        circle.style.backgroundColor = button.classList.contains('settings-item') ?
+                                      'rgba(218, 124, 93, 0.15)' : 'rgba(255, 255, 255, 0.7)';
+        circle.style.pointerEvents = 'none';
+        circle.style.zIndex = '0';
+
+        // Add the ripple and handle removal
+        button.appendChild(circle);
+
+        setTimeout(() => {
+          if (circle) {
+            circle.remove();
+          }
+        }, 600);
+      }
+
+      // Add ripple animation to stylesheet
+      const style = document.createElement('style');
+      style.textContent = `
+        @keyframes ripple {
+          to {
+            transform: scale(4);
+            opacity: 0;
+          }
+        }
+
+        /* Add hover state for interactive elements */
+        .settings-item:hover {
+          background-color: rgba(218, 124, 93, 0.08);
+        }
+
+        /* Make toggle switch container handle ripples */
+        .toggle-switch {
+          position: relative;
+          z-index: 2;
+        }
+      `;
+      document.head.appendChild(style);
+
+      // Special handler for the dark mode toggle section
+      const darkModeItem = document.querySelector('.settings-item:has(.toggle-switch)');
+      if (darkModeItem) {
+        darkModeItem.addEventListener('click', function(e) {
+          // If not clicking directly on the toggle, toggle it programmatically
+          if (!e.target.closest('.toggle-switch')) {
+            const toggle = this.querySelector('input[type="checkbox"]');
+            toggle.checked = !toggle.checked;
+
+            // Trigger the change event to update dark mode
+            const event = new Event('change');
+            toggle.dispatchEvent(event);
+          }
+        });
+      }
+    });
+</script>
+</body>
+</html>
