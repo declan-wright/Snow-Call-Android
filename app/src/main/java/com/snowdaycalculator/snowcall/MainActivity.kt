@@ -1,10 +1,14 @@
 package com.snowdaycalculator.snowcall
 
 import android.annotation.SuppressLint
+import android.net.http.SslError
 import android.os.Bundle
+import android.webkit.ConsoleMessage
+import android.webkit.SslErrorHandler
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
+import android.webkit.WebResourceResponse
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
@@ -26,7 +30,7 @@ class MainActivity : AppCompatActivity() {
         webView = findViewById(R.id.webView)
         swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout)
 
-        // Configure WebView
+        // Configure WebView with enhanced settings
         webView.settings.apply {
             javaScriptEnabled = true
             domStorageEnabled = true
@@ -34,17 +38,23 @@ class MainActivity : AppCompatActivity() {
             databaseEnabled = true
             loadWithOverviewMode = true
             useWideViewPort = true
-            cacheMode = WebSettings.LOAD_DEFAULT
+
+            // Enhanced settings for network access
             mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
+            cacheMode = WebSettings.LOAD_NO_CACHE // Try with no cache
+            allowContentAccess = true
+            allowFileAccess = true
+            setSupportMultipleWindows(true)
+            javaScriptCanOpenWindowsAutomatically = true
+            loadsImagesAutomatically = true
         }
 
         // Add JavaScript interface for native features
         webView.addJavascriptInterface(WebAppInterface(this), "Android")
 
-        // Set up WebViewClient to handle page loading
+        // Enhanced WebViewClient with detailed error handling
         webView.webViewClient = object : WebViewClient() {
             override fun onPageFinished(view: WebView?, url: String?) {
-                // Hide refresh animation when page loads
                 swipeRefreshLayout.isRefreshing = false
             }
 
@@ -53,18 +63,43 @@ class MainActivity : AppCompatActivity() {
                 request: WebResourceRequest?,
                 error: WebResourceError?
             ) {
-                // Show error message
+                val errorMessage = "Network error: ${error?.description}"
+                Toast.makeText(this@MainActivity, errorMessage, Toast.LENGTH_LONG).show()
+                swipeRefreshLayout.isRefreshing = false
+            }
+
+            // Allow any SSL certificates (only for testing)
+            override fun onReceivedSslError(view: WebView?, handler: SslErrorHandler?, error: SslError?) {
+                handler?.proceed() // Accept SSL certificates
+            }
+
+            // Debug HTTP errors
+            override fun onReceivedHttpError(
+                view: WebView?,
+                request: WebResourceRequest?,
+                errorResponse: WebResourceResponse?
+            ) {
                 Toast.makeText(
                     this@MainActivity,
-                    "Failed to load content. Please check your connection.",
+                    "HTTP Error: ${errorResponse?.statusCode} for ${request?.url}",
                     Toast.LENGTH_LONG
                 ).show()
-                swipeRefreshLayout.isRefreshing = false
             }
         }
 
-        // Set up WebChromeClient for JavaScript dialogs
-        webView.webChromeClient = WebChromeClient()
+        // Set up WebChromeClient for JavaScript dialogs and console messages
+        webView.webChromeClient = object : WebChromeClient() {
+            // Log console messages
+            override fun onConsoleMessage(consoleMessage: ConsoleMessage?): Boolean {
+                consoleMessage?.let {
+                    android.util.Log.d(
+                        "WebView Console",
+                        "${it.message()} -- From line ${it.lineNumber()} of ${it.sourceId()}"
+                    )
+                }
+                return true
+            }
+        }
 
         // Set up SwipeRefreshLayout
         swipeRefreshLayout.setOnRefreshListener {

@@ -876,7 +876,7 @@
 
 <div id="bottomSection">
     <img src="https://www.pressherald.com/wp-content/uploads/sites/4/2011/04/m-bath-rsu1-superintendent-patrick-manuel.jpg" alt="Patrick Manuel" class="avatar">
-    <p class="footer-message">Please, Dr. Manuel! We need a break!</p>
+    <p class="footer-message">Please, Patrick! We need a break!</p>
 </div>
 
 <!-- Settings Button -->
@@ -946,6 +946,59 @@
 </div>
 
 <script>
+    // Patch fetch to provide better error reporting
+    const originalFetch = window.fetch;
+    window.fetch = function(...args) {
+      console.log('Fetch request to:', args[0]);
+      return originalFetch(...args)
+        .then(response => {
+          console.log('Fetch response status:', response.status);
+          if (!response.ok) {
+            console.error('Fetch error:', response.status, response.statusText);
+          }
+          return response;
+        })
+        .catch(error => {
+          console.error('Fetch catch error:', error);
+          // If Android interface exists, show error
+          if (typeof Android !== 'undefined') {
+            Android.showToast('API Error: ' + error.message);
+          }
+          throw error;
+        });
+    };
+
+    // Add a global error handler
+    window.onerror = function(message, source, lineno, colno, error) {
+      console.error('Global error:', message, 'at', source, lineno, colno);
+      // If Android interface exists, show error
+      if (typeof Android !== 'undefined') {
+        Android.showToast('JavaScript Error: ' + message);
+      }
+      return false;
+    };
+
+    // Check network connectivity explicitly
+    function checkNetwork() {
+      console.log('Checking network connectivity...');
+      const testUrl = 'https://api.weather.gov/points/43.915,-69.837222';
+      return fetch(testUrl, {
+        method: 'HEAD',
+        headers: { "User-Agent": "SnowDayCalculator/1.0 (snowdaycalculator@protonmail.com)" }
+      })
+      .then(response => {
+        console.log('Network check response:', response.status);
+        return response.ok;
+      })
+      .catch(error => {
+        console.error('Network check failed:', error);
+        if (typeof Android !== 'undefined') {
+          Android.showToast('Network check failed: ' + error.message);
+        }
+        return false;
+      });
+    }
+
     // Model weights from Snowday Model F2 0.912.json
     const weights = {
       W1: [
@@ -1023,6 +1076,34 @@
     closeSettings.addEventListener("click", closeSettingsSheet);
     settingsOverlay.addEventListener("click", closeSettingsSheet);
     shareButton.addEventListener("click", shareApp);
+
+    // Add network check to calculate button
+    const calcButton = document.getElementById('calculateButton');
+    if (calcButton) {
+      const originalClickHandler = calcButton.onclick;
+      calcButton.onclick = function(event) {
+        console.log('Calculate button clicked');
+        // First check network
+        checkNetwork().then(isConnected => {
+          if (isConnected) {
+            console.log('Network is available, proceeding with calculation');
+            if (originalClickHandler) {
+              originalClickHandler.call(this, event);
+            } else {
+              handleCalculateClick();
+            }
+          } else {
+            console.error('Network is not available');
+            if (typeof Android !== 'undefined') {
+              Android.showToast('Unable to connect to weather API. Please check your connection.');
+            } else {
+              alert('Unable to connect to weather API. Please check your connection.');
+            }
+          }
+        });
+        return false; // Prevent default
+      };
+    }
 
     // Add swipe down to close settings
     let touchStartY = 0;
@@ -1171,7 +1252,18 @@
     }
 
     function shareApp() {
-      if (navigator.share) {
+      // Check if running in Android WebView
+      if (typeof Android !== 'undefined') {
+        try {
+          Android.shareContent(
+            'RSU1 Snow Day Calculator',
+            'Check out this Snow Day Calculator for RSU1 schools!',
+            window.location.href
+          );
+        } catch (e) {
+          console.error('Error sharing:', e);
+        }
+      } else if (navigator.share) {
         navigator.share({
           title: 'RSU1 Snow Day Calculator',
           text: 'Check out this Snow Day Calculator for RSU1 schools!',
