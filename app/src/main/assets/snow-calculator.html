@@ -6,56 +6,143 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Snow Day Calculator</title>
-    <link rel="stylesheet" href="https://use.typekit.net/ptq8jqe.css" />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" />
+    <!-- Material Design Web Components -->
+    <link rel="stylesheet" href="https://unpkg.com/material-components-web@14.0.0/dist/material-components-web.min.css">
+    <!-- Material Symbols (Variable Font) -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <!-- Google Fonts - Roboto for Material Design -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap">
     <style>
         /*----------------------------------------------------
-          CSS Variables for Light & Dark Modes
+          CSS Variables for Dynamic Theming
         ----------------------------------------------------*/
         :root {
-          --body-bg: #f0efe7;
-          --box-bg: #ffffff;
-          --heading-text: #3d3929;
-          --non-heading-text: #98958e;
-          --accent-color: #da7c5d;
-          --accent-hover-color: #c06548;
-          --border-color: #e0e0e0;
-          --gauge-bg: #e0e0e0;
-          --card-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-          --snowflake-color: rgba(0, 0, 0, 0.1);
-          --status-bar-bg: rgba(240, 239, 231, 0.9);
-          --settings-sheet-bg: rgba(245, 245, 245, 0.98);
-          --settings-item-bg: rgba(255, 255, 255, 0.7);
-          --settings-overlay: rgba(0, 0, 0, 0.4);
-          --switch-track-off: #e0e0e0;
-          --switch-track-on: #e7beae;
-          --switch-thumb-off: #ffffff;
-          --switch-thumb-on: #da7c5d;
-          --ripple-color: rgba(218, 124, 93, 0.12);
-          --elevation-1: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.14);
-          --elevation-2: 0 3px 6px rgba(0, 0, 0, 0.15), 0 2px 4px rgba(0, 0, 0, 0.12);
-          --elevation-4: 0 10px 15px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05);
-          --font-family: 'Roboto', -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+          /* Simplified Light Theme Variables */
+          --md-sys-color-primary: #8b5000;
+          --md-sys-color-on-primary: #ffffff;
+          --md-sys-color-primary-container: #ffdcb9;
+          --md-sys-color-on-primary-container: #2b1700;
+
+          /* Reduce unique colors by reusing colors */
+          --md-sys-color-secondary: #8b5000; /* Same as primary */
+          --md-sys-color-on-secondary: #ffffff; /* Same as on-primary */
+          --md-sys-color-secondary-container: #ffdcb9; /* Same as primary-container */
+          --md-sys-color-on-secondary-container: #2b1700; /* Same as on-primary-container */
+
+          --md-sys-color-tertiary: #5d6237;
+          --md-sys-color-on-tertiary: #ffffff;
+          --md-sys-color-tertiary-container: #e1e7b1;
+          --md-sys-color-on-tertiary-container: #1a1d00;
+
+          --md-sys-color-error: #ba1a1a;
+          --md-sys-color-on-error: #ffffff;
+          --md-sys-color-error-container: #ffdad6;
+          --md-sys-color-on-error-container: #410002;
+
+          --md-sys-color-background: #fffbff;
+          --md-sys-color-on-background: #1f1b16;
+          --md-sys-color-surface: #fffbff;
+          --md-sys-color-on-surface: #1f1b16;
+          --md-sys-color-surface-container: #ffffff;
+          --md-sys-color-on-surface-container: #1f1b16; /* Same as on-background */
+          --md-sys-color-surface-variant: #f0e0d0;
+          --md-sys-color-on-surface-variant: #1f1b16; /* Same as on-background */
+
+          --md-sys-color-outline: #827568;
+          --md-sys-color-outline-variant: #d3c4b5;
+          --md-sys-color-shadow: rgba(0, 0, 0, 0.1);
+          --md-sys-elevation-1: 0 1px 2px 0 rgba(0, 0, 0, 0.1), 0 1px 3px 1px rgba(0, 0, 0, 0.08);
+          --md-sys-elevation-2: 0 2px 4px 0 rgba(0, 0, 0, 0.1), 0 3px 5px 2px rgba(0, 0, 0, 0.08);
+          --md-sys-elevation-3: 0 4px 8px 3px rgba(0, 0, 0, 0.1), 0 1px 10px 0 rgba(0, 0, 0, 0.08);
+
+          /* Status Bar Background */
+          --md-sys-color-status-bar: rgba(255, 251, 255, 0.95);
+
+          /* Original color scheme (for when Material Theming is off) */
+          --original-primary: #da7c5d;
+          --original-primary-variant: #c06548;
+          --original-background: #f0efe7;
+          --original-surface: #ffffff;
+          --original-on-primary: #ffffff;
+          --original-on-background: #3d3929;
+          --original-on-surface: #3d3929;
+          --original-on-surface-variant: #98958e;
         }
 
-        body.dark-mode {
-          --body-bg: #272726;
-          --box-bg: #3e3d3a;
-          --heading-text: #e2e2df;
-          --non-heading-text: #98958e;
-          --accent-color: #da7c5d;
-          --accent-hover-color: #c06548;
-          --border-color: #444;
-          --gauge-bg: #444;
-          --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.2), 0 1px 2px rgba(0, 0, 0, 0.12);
-          --snowflake-color: rgba(255, 255, 255, 0.5);
-          --status-bar-bg: rgba(39, 39, 38, 0.9);
-          --settings-sheet-bg: rgba(62, 61, 58, 0.98);
-          --settings-item-bg: rgba(80, 80, 75, 0.5);
-          --settings-overlay: rgba(0, 0, 0, 0.7);
-          --switch-track-off: #555;
-          --switch-track-on: #8c5a4a;
-          --ripple-color: rgba(218, 124, 93, 0.2);
+        [data-theme="dark"] {
+          /* Simplified Dark Theme Variables */
+          --md-sys-color-primary: #ffb86b;
+          --md-sys-color-on-primary: #492900;
+          --md-sys-color-primary-container: #673d00;
+          --md-sys-color-on-primary-container: #ffdcb9;
+
+          /* Reduce unique colors by reusing colors */
+          --md-sys-color-secondary: #ffb86b; /* Same as primary */
+          --md-sys-color-on-secondary: #492900; /* Same as on-primary */
+          --md-sys-color-secondary-container: #673d00; /* Same as primary-container */
+          --md-sys-color-on-secondary-container: #ffdcb9; /* Same as on-primary-container */
+
+          --md-sys-color-tertiary: #c5cb97;
+          --md-sys-color-on-tertiary: #303410;
+          --md-sys-color-tertiary-container: #464a23;
+          --md-sys-color-on-tertiary-container: #e1e7b1;
+
+          --md-sys-color-error: #ffb4ab;
+          --md-sys-color-on-error: #690005;
+          --md-sys-color-error-container: #93000a;
+          --md-sys-color-on-error-container: #ffdad6;
+
+          --md-sys-color-background: #1f1b16;
+          --md-sys-color-on-background: #ebe1d9;
+          --md-sys-color-surface: #1f1b16;
+          --md-sys-color-on-surface: #ebe1d9;
+          --md-sys-color-surface-container: #2e2922;
+          --md-sys-color-on-surface-container: #ebe1d9; /* Same as on-background */
+          --md-sys-color-surface-variant: #504539;
+          --md-sys-color-on-surface-variant: #ebe1d9; /* Same as on-background */
+
+          --md-sys-color-outline: #9c8a78;
+          --md-sys-color-outline-variant: #504539;
+          --md-sys-color-shadow: rgba(0, 0, 0, 0.3);
+          --md-sys-color-status-bar: rgba(31, 27, 22, 0.95);
+
+          /* Original dark color scheme */
+          --original-primary: #da7c5d;
+          --original-primary-variant: #c06548;
+          --original-background: #272726;
+          --original-surface: #3e3d3a;
+          --original-on-primary: #ffffff;
+          --original-on-background: #e2e2df;
+          --original-on-surface: #e2e2df;
+          --original-on-surface-variant: #98958e;
+        }
+
+        /* When Material Theming is off */
+        [data-material-theming="off"] {
+          --md-sys-color-primary: var(--original-primary);
+          --md-sys-color-on-primary: var(--original-on-primary);
+          --md-sys-color-primary-container: var(--original-primary-variant);
+          --md-sys-color-on-primary-container: var(--original-on-primary);
+
+          --md-sys-color-secondary: var(--original-primary);
+          --md-sys-color-on-secondary: var(--original-on-primary);
+          --md-sys-color-secondary-container: var(--original-primary-variant);
+          --md-sys-color-on-secondary-container: var(--original-on-primary);
+
+          --md-sys-color-tertiary: var(--original-primary);
+          --md-sys-color-on-tertiary: var(--original-on-primary);
+          --md-sys-color-tertiary-container: var(--original-primary-variant);
+          --md-sys-color-on-tertiary-container: var(--original-on-primary);
+
+          --md-sys-color-background: var(--original-background);
+          --md-sys-color-on-background: var(--original-on-background);
+          --md-sys-color-surface: var(--original-surface);
+          --md-sys-color-on-surface: var(--original-on-surface);
+          --md-sys-color-surface-container: var(--original-surface);
+          --md-sys-color-on-surface-container: var(--original-on-surface);
+          --md-sys-color-surface-variant: var(--original-surface);
+          --md-sys-color-on-surface-variant: var(--original-on-surface-variant);
         }
 
         /*----------------------------------------------------
@@ -70,22 +157,22 @@
 
         html {
           height: -webkit-fill-available;
-          font-family: var(--font-family);
         }
 
         body {
           min-height: 100vh;
           min-height: -webkit-fill-available;
-          background-color: var(--body-bg);
-          color: var(--heading-text);
+          background-color: var(--md-sys-color-background);
+          color: var(--md-sys-color-on-background);
+          font-family: 'Roboto', -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
           display: flex;
           flex-direction: column;
-          align-items: center;
+          align-items: stretch;
           transition: background-color 0.25s ease, color 0.25s ease;
-          padding: env(safe-area-inset-top, 20px) 16px env(safe-area-inset-bottom, 20px) 16px;
+          padding: 0;
+          margin: 0;
           opacity: 0;
           animation: fadeIn 0.8s ease-out forwards 0.2s;
-          position: relative;
           overflow-x: hidden;
         }
 
@@ -94,108 +181,136 @@
         }
 
         /*----------------------------------------------------
-          Status Bar Styling
+          Top App Bar
         ----------------------------------------------------*/
-        #status-bar {
+        .top-app-bar {
           position: fixed;
           top: 0;
           left: 0;
           right: 0;
-          height: env(safe-area-inset-top, 20px);
-          background-color: var(--status-bar-bg);
-          z-index: 1000;
-          backdrop-filter: blur(10px);
-          -webkit-backdrop-filter: blur(10px);
+          z-index: 10;
+          height: 64px;
+          padding-top: env(safe-area-inset-top, 0);
+          background-color: var(--md-sys-color-status-bar);
+          backdrop-filter: blur(12px);
+          -webkit-backdrop-filter: blur(12px);
+          box-shadow: var(--md-sys-elevation-1);
+          display: flex;
+          align-items: center;
+          justify-content: center;
           transition: background-color 0.25s ease;
         }
 
-        /*----------------------------------------------------
-          App Header & Typography
-        ----------------------------------------------------*/
-        .app-header {
-          width: 100%;
+        .app-title {
+          font-size: 1.25rem;
+          font-weight: 500;
+          color: var(--md-sys-color-on-background);
           text-align: center;
-          margin-bottom: 20px;
-          transform: translateY(-10px);
+        }
+
+        /*----------------------------------------------------
+          Container Layout
+        ----------------------------------------------------*/
+        .main-container {
+          padding: calc(64px + env(safe-area-inset-top, 0) + 16px) 16px calc(16px + env(safe-area-inset-bottom, 0)) 16px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 16px;
+          width: 100%;
+        }
+
+        /*----------------------------------------------------
+          Material Card Styling
+        ----------------------------------------------------*/
+        .md-card {
+          width: 100%;
+          max-width: 500px;
+          background-color: var(--md-sys-color-surface-container);
+          border-radius: 16px;
+          box-shadow: var(--md-sys-elevation-1);
+          margin-bottom: 16px;
+          overflow: hidden;
+          transform: translateY(20px);
           opacity: 0;
-          animation: slideDown 0.8s ease-out forwards 0.4s;
+          transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
-        @keyframes slideDown {
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
+        .md-card.show {
+          transform: translateY(0);
+          opacity: 1;
         }
 
-        h1 {
-          font-family: var(--font-family);
-          font-size: 1.75rem;
-          font-weight: 700;
-          color: var(--heading-text);
-          letter-spacing: -0.5px;
+        .md-card-header {
+          padding: 16px 16px 8px 16px;
+        }
+
+        .md-card-title {
+          font-size: 1.125rem;
+          font-weight: 500;
+          color: var(--md-sys-color-on-surface);
           margin-bottom: 4px;
-          padding: 0 10px;
         }
 
-        #subheading {
-          font-size: 0.875rem;
-          color: var(--non-heading-text);
-          font-style: italic;
-          margin-bottom: 8px;
-          opacity: 0;
-          animation: fadeIn 0.8s ease-out forwards 0.6s;
+        .md-card-content {
+          padding: 8px 16px 16px 16px;
         }
 
-        #dateDisplay {
-          background-color: var(--box-bg);
-          border-radius: 8px;
+        /*----------------------------------------------------
+          Date Display
+        ----------------------------------------------------*/
+        .date-display {
+          background-color: var(--md-sys-color-surface-variant);
+          border-radius: 20px;
           padding: 12px 20px;
           width: 100%;
           max-width: 300px;
           margin: 0 auto 16px;
           font-size: 0.95rem;
           font-weight: 500;
-          color: var(--heading-text);
-          box-shadow: var(--elevation-1);
+          color: var(--md-sys-color-on-surface-variant);
+          box-shadow: var(--md-sys-elevation-1);
           text-align: center;
           transform: scale(0.95);
           opacity: 0;
           transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
-        #dateDisplay.show {
+        .date-display.show {
           opacity: 1;
           transform: scale(1);
         }
 
         /*----------------------------------------------------
-          Button Styling
+          Material Button
         ----------------------------------------------------*/
-        #calculateButton {
-          width: 100%;
-          max-width: 300px;
-          padding: 14px 16px;
-          border-radius: 8px;
-          background-color: var(--accent-color);
-          color: white;
-          font-size: 0.95rem;
-          font-weight: 500;
-          border: none;
-          box-shadow: var(--elevation-1);
-          margin-bottom: 24px;
-          cursor: pointer;
-          transition: all 0.3s ease;
+        .md-button {
           display: flex;
           align-items: center;
           justify-content: center;
           gap: 8px;
-          -webkit-appearance: none;
+          min-height: 40px;
+          padding: 0 24px;
+          border-radius: 20px;
+          font-size: 0.875rem;
+          font-weight: 500;
+          letter-spacing: 0.1px;
+          text-transform: capitalize;
+          cursor: pointer;
+          transition: all 0.2s ease;
           position: relative;
           overflow: hidden;
+          border: none;
+          -webkit-appearance: none;
+          margin-bottom: 24px; /* Added more space between button and card */
         }
 
-        #calculateButton::after {
+        .md-button-text {
+          position: relative;
+          z-index: 1;
+        }
+
+        .md-button::after {
           content: "";
           display: block;
           position: absolute;
@@ -204,7 +319,7 @@
           top: 0;
           left: 0;
           pointer-events: none;
-          background-image: radial-gradient(circle, #fff 10%, transparent 10.01%);
+          background-image: radial-gradient(circle, rgba(255, 255, 255, 0.4) 10%, transparent 10.01%);
           background-repeat: no-repeat;
           background-position: 50%;
           transform: scale(10, 10);
@@ -212,18 +327,27 @@
           transition: transform 0.4s, opacity 0.8s;
         }
 
-        #calculateButton:active::after {
+        .md-button:active::after {
           transform: scale(0, 0);
           opacity: 0.3;
           transition: 0s;
         }
 
-        #calculateButton:active {
+        .md-button:active {
           transform: scale(0.98);
-          box-shadow: var(--elevation-1);
         }
 
-        #calculateButton.analyzing {
+        .md-button-filled {
+          background-color: var(--md-sys-color-primary);
+          color: var(--md-sys-color-on-primary);
+          box-shadow: var(--md-sys-elevation-1);
+        }
+
+        .md-button-filled:active {
+          box-shadow: var(--md-sys-elevation-1);
+        }
+
+        .md-button.analyzing {
           animation: pulse 1.5s infinite alternate;
           pointer-events: none;
         }
@@ -234,43 +358,14 @@
         }
 
         /*----------------------------------------------------
-          Card Components
-        ----------------------------------------------------*/
-        .card {
-          width: 100%;
-          max-width: 500px;
-          background-color: var(--box-bg);
-          border-radius: 8px;
-          padding: 20px;
-          margin-bottom: 16px;
-          box-shadow: var(--elevation-1);
-          transform: translateY(20px);
-          opacity: 0;
-          transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-          overflow: hidden;
-        }
-
-        .card.show {
-          transform: translateY(0);
-          opacity: 1;
-        }
-
-        .card h2 {
-          font-size: 1.125rem;
-          font-weight: 700;
-          color: var(--heading-text);
-          margin-bottom: 16px;
-          text-align: center;
-        }
-
-        /*----------------------------------------------------
           Weather Conditions Layout
         ----------------------------------------------------*/
         .conditions {
           display: flex;
           justify-content: space-around;
-          align-items: center;
+          align-items: stretch;
           gap: 8px;
+          width: 100%;
         }
 
         .condition-group {
@@ -278,16 +373,14 @@
           display: flex;
           flex-direction: column;
           align-items: center;
-          padding: 12px 8px;
-          background-color: rgba(0, 0, 0, 0.02);
-          border-radius: 8px;
+          justify-content: center;
+          padding: 16px 8px;
+          min-height: 110px;
+          background-color: var(--md-sys-color-surface-variant);
+          border-radius: 16px;
           transition: transform 0.2s ease;
           position: relative;
           overflow: hidden;
-        }
-
-        body.dark-mode .condition-group {
-          background-color: rgba(255, 255, 255, 0.03);
         }
 
         .condition-group::after {
@@ -299,7 +392,7 @@
           top: 0;
           left: 0;
           pointer-events: none;
-          background-image: radial-gradient(circle, var(--ripple-color) 10%, transparent 10.01%);
+          background-image: radial-gradient(circle, rgba(var(--md-sys-color-primary-rgb), 0.1) 10%, transparent 10.01%);
           background-repeat: no-repeat;
           background-position: 50%;
           transform: scale(10, 10);
@@ -317,101 +410,105 @@
           transform: scale(0.98);
         }
 
-        .condition-group .material-icons-round {
-          font-size: 1.75rem;
-          color: var(--accent-color);
+        .material-symbols-rounded, .material-symbols-outlined {
+          font-size: 24px;
+          font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+          color: var(--md-sys-color-primary);
           margin-bottom: 8px;
         }
 
         .data-value {
           font-size: 1.25rem;
           font-weight: 500;
-          color: var(--heading-text);
+          color: var(--md-sys-color-on-surface-variant);
           margin-bottom: 4px;
         }
 
         .condition-label {
           font-size: 0.8rem;
-          color: var(--non-heading-text);
+          color: var(--md-sys-color-on-surface-variant);
+          opacity: 0.8;
           text-align: center;
+          width: 100%;
+          line-height: 1.2;
         }
 
         /*----------------------------------------------------
           Prediction Gauge
         ----------------------------------------------------*/
-        #gauge {
+        .gauge-container {
+          width: 100%;
+          margin-bottom: 20px;
+        }
+
+        .gauge {
           position: relative;
           width: 100%;
-          height: 36px;
-          background: var(--gauge-bg);
-          border-radius: 8px;
+          height: 12px;
+          background: var(--md-sys-color-surface-variant);
+          border-radius: 6px;
           overflow: hidden;
-          margin-bottom: 20px;
+          margin-bottom: 16px;
           box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
         }
 
-        #gauge-fill {
+        .gauge-fill {
           position: absolute;
           top: 0;
           left: 0;
           height: 100%;
           width: 0;
-          background: linear-gradient(90deg, var(--accent-color), #e87e55);
-          border-radius: 8px;
+          background: linear-gradient(90deg, var(--md-sys-color-primary), var(--md-sys-color-tertiary));
+          border-radius: 6px;
           transition: width 2.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
         }
 
-        #gauge-text {
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-weight: 700;
-          font-size: 1rem;
-          color: var(--heading-text);
-          z-index: 1;
-          text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        .gauge-value {
+          font-size: 3rem;
+          font-weight: 300;
+          color: var(--md-sys-color-on-surface);
+          text-align: center;
+          margin-top: 8px;
+          margin-bottom: 16px;
         }
 
         .prediction-result {
-          text-align: center;
           padding: 16px;
-          background-color: rgba(0, 0, 0, 0.02);
-          border-radius: 8px;
-        }
-
-        body.dark-mode .prediction-result {
-          background-color: rgba(255, 255, 255, 0.03);
+          background-color: var(--md-sys-color-surface-variant);
+          border-radius: 16px;
+          text-align: center;
         }
 
         .prediction-header {
-          font-size: 0.95rem;
-          font-weight: 600;
-          color: var(--heading-text);
+          font-size: 1rem;
+          font-weight: 500;
+          color: var(--md-sys-color-on-surface-variant);
           margin-bottom: 8px;
         }
 
+        .prediction-header strong {
+          font-weight: 700;
+        }
+
         .prediction-description {
-          font-size: 0.875rem;
-          color: var(--non-heading-text);
+          font-size: 0.9rem;
+          color: var(--md-sys-color-on-surface-variant);
+          opacity: 0.9;
           line-height: 1.4;
         }
 
         /*----------------------------------------------------
           Bottom Section
         ----------------------------------------------------*/
-        #bottomSection {
+        .bottom-section {
           width: 100%;
           display: flex;
           flex-direction: column;
           align-items: center;
           margin-top: auto;
           padding-top: 24px;
-          margin-bottom: 60px; /* Make room for the settings button */
+          margin-bottom: calc(80px + env(safe-area-inset-bottom, 0));
           opacity: 0;
           animation: fadeIn 1s ease-out forwards 1s;
         }
@@ -422,13 +519,13 @@
           border-radius: 50%;
           object-fit: cover;
           margin-bottom: 12px;
-          border: 2px solid var(--accent-color);
-          box-shadow: var(--elevation-1);
+          border: 2px solid var(--md-sys-color-primary);
+          box-shadow: var(--md-sys-elevation-1);
         }
 
         .footer-message {
           font-size: 0.9rem;
-          color: var(--heading-text);
+          color: var(--md-sys-color-on-background);
           font-style: italic;
           margin-bottom: 20px;
           text-align: center;
@@ -436,122 +533,104 @@
 
         .footer-info {
           font-size: 0.8rem;
-          color: var(--non-heading-text);
+          color: var(--md-sys-color-on-surface-variant);
           text-align: center;
           margin-bottom: 16px;
           line-height: 1.5;
         }
 
         /*----------------------------------------------------
-          Settings Button
+          Settings FAB
         ----------------------------------------------------*/
-        #settingsButton {
+        .fab {
           position: fixed;
-          bottom: max(16px, env(safe-area-inset-bottom, 16px));
-          left: 50%;
-          transform: translateX(-50%);
-          padding: 10px 20px;
-          background-color: var(--box-bg);
-          color: var(--heading-text);
-          border: none;
-          border-radius: 8px;
-          font-size: 0.875rem;
-          font-weight: 600;
-          box-shadow: var(--elevation-2);
+          right: 16px;
+          bottom: calc(16px + env(safe-area-inset-bottom, 0));
+          width: 56px;
+          height: 56px;
+          border-radius: 28px;
+          background-color: var(--md-sys-color-primary-container);
+          color: var(--md-sys-color-on-primary-container);
+          box-shadow: var(--md-sys-elevation-2);
           display: flex;
           align-items: center;
           justify-content: center;
-          gap: 6px;
-          z-index: 100;
           cursor: pointer;
           transition: all 0.3s ease;
-          position: relative;
-          overflow: hidden;
+          z-index: 100;
+          border: none;
+          outline: none;
+          -webkit-tap-highlight-color: transparent;
         }
 
-        #settingsButton::after {
-          content: "";
-          display: block;
-          position: absolute;
-          width: 100%;
-          height: 100%;
-          top: 0;
-          left: 0;
-          pointer-events: none;
-          background-image: radial-gradient(circle, var(--ripple-color) 10%, transparent 10.01%);
-          background-repeat: no-repeat;
-          background-position: 50%;
-          transform: scale(10, 10);
-          opacity: 0;
-          transition: transform 0.4s, opacity 0.8s;
+        .fab:active {
+          transform: scale(0.95);
+          box-shadow: var(--md-sys-elevation-1);
         }
 
-        #settingsButton:active::after {
-          transform: scale(0, 0);
-          opacity: 0.6;
-          transition: 0s;
+        .fab::after {
+          display: none; /* Remove the ripple effect circle */
         }
 
-        #settingsButton:active {
-          transform: translateX(-50%) scale(0.96);
+        .fab .material-symbols-rounded {
+          color: var(--md-sys-color-on-primary-container);
+          margin-bottom: 0;
         }
 
         /*----------------------------------------------------
-          Settings Sheet
+          Bottom Sheet
         ----------------------------------------------------*/
-        #settingsOverlay {
+        .sheet-overlay {
           position: fixed;
           top: 0;
           left: 0;
           right: 0;
           bottom: 0;
-          background-color: var(--settings-overlay);
+          background-color: rgba(0, 0, 0, 0.3);
           z-index: 1000;
           opacity: 0;
           pointer-events: none;
           transition: opacity 0.3s ease;
         }
 
-        #settingsOverlay.active {
+        .sheet-overlay.active {
           opacity: 1;
           pointer-events: all;
         }
 
-        #settingsSheet {
+        .bottom-sheet {
           position: fixed;
           bottom: 0;
           left: 0;
           right: 0;
-          background-color: var(--settings-sheet-bg);
-          border-radius: 16px 16px 0 0;
-          box-shadow: var(--elevation-4);
-          padding: 20px 16px max(20px, env(safe-area-inset-bottom, 20px)) 16px;
+          background-color: var(--md-sys-color-surface);
+          border-radius: 28px 28px 0 0;
+          box-shadow: var(--md-sys-elevation-3);
+          padding: 24px 16px max(24px, env(safe-area-inset-bottom, 0)) 16px;
           z-index: 2000;
           transform: translateY(100%);
           transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-          backdrop-filter: blur(10px);
-          -webkit-backdrop-filter: blur(10px);
         }
 
-        #settingsSheet.active {
+        .bottom-sheet.active {
           transform: translateY(0);
         }
 
         /* Pull indicator */
-        #settingsSheet::before {
+        .bottom-sheet::before {
           content: '';
           position: absolute;
           top: 8px;
           left: 50%;
           transform: translateX(-50%);
-          width: 36px;
+          width: 32px;
           height: 4px;
-          background-color: var(--non-heading-text);
-          opacity: 0.3;
+          background-color: var(--md-sys-color-outline);
+          opacity: 0.4;
           border-radius: 2px;
         }
 
-        .settings-header {
+        .sheet-header {
           display: flex;
           align-items: center;
           justify-content: space-between;
@@ -559,46 +638,21 @@
           margin-bottom: 8px;
         }
 
-        .settings-title {
+        .sheet-title {
           font-size: 1.25rem;
-          font-weight: 700;
-          color: var(--heading-text);
+          font-weight: 500;
+          color: var(--md-sys-color-on-surface);
         }
 
-        .settings-done {
+        .close-button {
+          color: var(--md-sys-color-primary);
           background: none;
           border: none;
-          color: var(--accent-color);
           font-size: 0.95rem;
           font-weight: 500;
           cursor: pointer;
           padding: 8px 12px;
           border-radius: 4px;
-          position: relative;
-          overflow: hidden;
-        }
-
-        .settings-done::after {
-          content: "";
-          display: block;
-          position: absolute;
-          width: 100%;
-          height: 100%;
-          top: 0;
-          left: 0;
-          pointer-events: none;
-          background-image: radial-gradient(circle, var(--ripple-color) 10%, transparent 10.01%);
-          background-repeat: no-repeat;
-          background-position: 50%;
-          transform: scale(10, 10);
-          opacity: 0;
-          transition: transform 0.4s, opacity 0.8s;
-        }
-
-        .settings-done:active::after {
-          transform: scale(0, 0);
-          opacity: 0.6;
-          transition: 0s;
         }
 
         .settings-section {
@@ -609,7 +663,7 @@
           text-transform: uppercase;
           font-size: 0.75rem;
           font-weight: 500;
-          color: var(--non-heading-text);
+          color: var(--md-sys-color-on-surface-variant);
           margin-bottom: 8px;
           padding: 0 8px;
           letter-spacing: 0.5px;
@@ -620,11 +674,9 @@
           align-items: center;
           justify-content: space-between;
           padding: 16px;
-          background-color: var(--settings-item-bg);
-          border-radius: 8px;
+          background-color: var(--md-sys-color-surface-variant);
+          border-radius: 16px;
           margin-bottom: 8px;
-          backdrop-filter: blur(5px);
-          -webkit-backdrop-filter: blur(5px);
           position: relative;
           overflow: hidden;
           cursor: pointer;
@@ -633,7 +685,7 @@
         .settings-item-title {
           font-size: 0.95rem;
           font-weight: 400;
-          color: var(--heading-text);
+          color: var(--md-sys-color-on-surface-variant);
         }
 
         .settings-item-right {
@@ -644,124 +696,90 @@
         .settings-version {
           font-size: 0.95rem;
           font-weight: 400;
-          color: var(--non-heading-text);
+          color: var(--md-sys-color-on-surface-variant);
+          opacity: 0.7;
         }
 
         .settings-bundle {
           font-size: 0.875rem;
           font-weight: 400;
-          color: var(--non-heading-text);
+          color: var(--md-sys-color-on-surface-variant);
+          opacity: 0.7;
         }
 
         /*----------------------------------------------------
-          Material Design Toggle Switch
+          Switch
         ----------------------------------------------------*/
-        .toggle-switch {
+        .md-switch {
           position: relative;
           display: inline-block;
-          width: 36px;
-          height: 20px;
+          width: 52px;
+          height: 32px;
         }
 
-        .toggle-switch input {
+        .md-switch input {
           opacity: 0;
           width: 0;
           height: 0;
         }
 
-        .toggle-slider {
+        .switch-track {
           position: absolute;
           cursor: pointer;
           top: 0;
           left: 0;
           right: 0;
           bottom: 0;
-          background-color: var(--switch-track-off);
+          background-color: var(--md-sys-color-outline);
           transition: .3s;
-          border-radius: 10px;
+          border-radius: 16px;
         }
 
-        .toggle-slider:before {
+        .switch-track:before {
           position: absolute;
           content: "";
-          height: 14px;
-          width: 14px;
-          left: 3px;
-          bottom: 3px;
-          background-color: var(--switch-thumb-off);
+          height: 24px;
+          width: 24px;
+          left: 4px;
+          bottom: 4px;
+          background-color: var(--md-sys-color-surface);
           transition: .3s;
           border-radius: 50%;
           box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
         }
 
-        input:checked + .toggle-slider {
-          background-color: var(--switch-track-on);
+        input:checked + .switch-track {
+          background-color: var(--md-sys-color-primary);
         }
 
-        input:checked + .toggle-slider:before {
-          transform: translateX(16px);
-          background-color: var(--switch-thumb-on);
-        }
-
-        /*----------------------------------------------------
-          External Link Styling
-        ----------------------------------------------------*/
-        .external-link {
-          color: var(--accent-color);
-          text-decoration: none;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          width: 24px;
-          height: 24px;
+        input:checked + .switch-track:before {
+          transform: translateX(20px);
         }
 
         /*----------------------------------------------------
           Share Button
         ----------------------------------------------------*/
         .share-button {
-          color: var(--accent-color);
+          color: var(--md-sys-color-primary);
           background: none;
           border: none;
           display: flex;
           align-items: center;
           justify-content: center;
           cursor: pointer;
-          font-size: 1.4rem;
-          position: relative;
-          overflow: hidden;
-          width: 40px;
-          height: 40px;
+          width: 15px;
+          height: 15px;
           border-radius: 20px;
         }
 
-        .share-button::after {
-          content: "";
-          display: block;
-          position: absolute;
-          width: 100%;
-          height: 100%;
-          top: 0;
-          left: 0;
-          pointer-events: none;
-          background-image: radial-gradient(circle, var(--ripple-color) 10%, transparent 10.01%);
-          background-repeat: no-repeat;
-          background-position: 50%;
-          transform: scale(10, 10);
-          opacity: 0;
-          transition: transform 0.4s, opacity 0.8s;
-        }
-
-        .share-button:active::after {
-          transform: scale(0, 0);
-          opacity: 0.6;
-          transition: 0s;
+        .share-button .material-symbols-rounded {
+          font-size: 15px;
         }
 
         /*----------------------------------------------------
           Snowflakes Animation
         ----------------------------------------------------*/
-        #snowflakes {
+        .snowflakes {
           position: fixed;
           top: 0;
           left: 0;
@@ -776,20 +794,24 @@
           position: absolute;
           width: 4px;
           height: 4px;
-          background: var(--snowflake-color);
+          background-color: var(--md-sys-color-on-background);
+          opacity: 0.1;
           border-radius: 50%;
-          opacity: 0.7;
           animation: snowfall linear infinite;
+        }
+
+        [data-theme="dark"] .snowflake {
+          opacity: 0.15;
         }
 
         @keyframes snowfall {
           0% { transform: translateY(-5vh) rotate(0deg); opacity: 0; }
-          20% { opacity: 0.7; }
+          20% { opacity: 0.1; }
           100% { transform: translateY(105vh) rotate(360deg); opacity: 0; }
         }
 
         /*----------------------------------------------------
-          Loading Indicator
+          Loading Spinner
         ----------------------------------------------------*/
         .loading-spinner {
           display: inline-block;
@@ -809,143 +831,265 @@
           Responsive Adjustments
         ----------------------------------------------------*/
         @media (min-width: 500px) {
-          .card {
-            padding: 24px;
+          .main-container {
+            padding-top: calc(80px + env(safe-area-inset-top, 0));
           }
 
-          h1 {
-            font-size: 2rem;
+          .top-app-bar {
+            height: 80px;
+          }
+
+          .app-title {
+            font-size: 1.5rem;
+          }
+
+          .md-card-header {
+            padding: 24px 24px 12px 24px;
+          }
+
+          .md-card-content {
+            padding: 12px 24px 24px 24px;
+          }
+
+          .md-card-title {
+            font-size: 1.25rem;
           }
 
           .data-value {
             font-size: 1.4rem;
           }
 
-          .conditions {
-            gap: 12px;
+          .condition-group {
+            padding: 20px 12px;
           }
 
-          #calculateButton {
+          .conditions {
+            gap: 16px;
+          }
+
+          .md-button {
+            padding: 0 28px;
+            min-height: 44px;
             font-size: 1rem;
+          }
+        }
+
+        @media (min-width: 768px) {
+          .main-container {
+            gap: 24px;
+          }
+
+          .md-card {
+            max-width: 600px;
           }
         }
     </style>
 </head>
+
 <body>
-<div id="status-bar"></div>
-<div id="snowflakes" aria-hidden="true"></div>
-
-<div class="app-header">
-    <h1> ​​​​​​​​​​​​​​​​​​​​​​​​​​​​​ </h1>
-    <h1>RSU1 SNOW CALL</h1>
-    <p id="subheading">world's most accurate</p>
+<!-- Top App Bar -->
+<div class="top-app-bar">
+    <h1 class="app-title">RSU1 SNOW CALL</h1>
 </div>
 
-<div id="dateDisplay"></div>
+<!-- Main Content -->
+<div class="main-container">
+    <!-- Date Display -->
+    <div id="dateDisplay" class="date-display"></div>
 
-<button id="calculateButton">
-    <span id="buttonText">Calculate Snow Day Chance</span>
-    <span id="loadingSpinner" class="loading-spinner" style="display: none;"></span>
-</button>
+    <!-- Calculate Button -->
+    <button id="calculateButton" class="md-button md-button-filled">
+        <span id="buttonText" class="md-button-text">Calculate Snow Day Chance</span>
+        <span id="loadingSpinner" class="loading-spinner" style="display: none;"></span>
+    </button>
 
-<div id="weatherData" class="card">
-    <h2>Current Conditions</h2>
-    <div class="conditions">
-        <div class="condition-group">
-            <span class="material-icons-round">thermostat</span>
-            <span class="data-value" id="temperature"></span>
-            <span class="condition-label">Expected Temp</span>
+    <!-- Weather Data Card -->
+    <div id="weatherData" class="md-card">
+        <div class="md-card-header">
+            <h2 class="md-card-title">Current Conditions</h2>
         </div>
-        <div class="condition-group">
-            <span class="material-icons-round">ac_unit</span>
-            <span class="data-value" id="snow"></span>
-            <span class="condition-label">Expected Snow</span>
-        </div>
-        <div class="condition-group">
-            <span class="material-icons-round">history</span>
-            <span class="data-value" id="prevSnow"></span>
-            <span class="condition-label">Previous Snow</span>
-        </div>
-    </div>
-</div>
-
-<div id="prediction" class="card">
-    <h2>Snow Day Prediction</h2>
-    <p id="predictionText">Click "Calculate" to see your snow day prediction.</p>
-</div>
-
-<div id="bottomSection">
-    <img src="https://www.pressherald.com/wp-content/uploads/sites/4/2011/04/m-bath-rsu1-superintendent-patrick-manuel.jpg" alt="Patrick Manuel" class="avatar">
-    <p class="footer-message">Please, Patrick! We need a break!</p>
-</div>
-
-<!-- Settings Button -->
-<button id="settingsButton">
-    <span class="material-icons-round">settings</span>
-    Settings
-</button>
-
-<!-- Settings Sheet Overlay -->
-<div id="settingsOverlay"></div>
-
-<!-- Settings Sheet -->
-<div id="settingsSheet">
-    <div class="settings-header">
-        <h2 class="settings-title">Settings</h2>
-        <button class="settings-done" id="closeSettings">Done</button>
-    </div>
-
-    <div class="settings-section">
-        <div class="settings-section-header">Appearance</div>
-        <div class="settings-item">
-            <div class="settings-item-title">Dark Mode</div>
-            <div class="settings-item-right">
-                <label class="toggle-switch">
-                    <input type="checkbox" id="darkModeToggle">
-                    <span class="toggle-slider"></span>
-                </label>
+        <div class="md-card-content">
+            <div class="conditions">
+                <div class="condition-group">
+                    <span class="material-symbols-rounded">device_thermostat</span>
+                    <span class="data-value" id="temperature"></span>
+                    <span class="condition-label">Expected Temp</span>
+                </div>
+                <div class="condition-group">
+                    <span class="material-symbols-rounded">weather_snowy</span>
+                    <span class="data-value" id="snow"></span>
+                    <span class="condition-label">Expected Snow</span>
+                </div>
+                <div class="condition-group">
+                    <span class="material-symbols-rounded">history</span>
+                    <span class="data-value" id="prevSnow"></span>
+                    <span class="condition-label">Previous Snow</span>
+                </div>
             </div>
         </div>
     </div>
 
-    <div class="settings-section">
-        <div class="settings-section-header">Share</div>
-        <div class="settings-item">
-            <div class="settings-item-title">Share Snow Day Calculator</div>
-            <div class="settings-item-right">
-                <button class="share-button" id="shareButton">
-                    <span class="material-icons-round">share</span>
-                </button>
-            </div>
+    <!-- Prediction Card -->
+    <div id="prediction" class="md-card">
+        <div class="md-card-header">
+            <h2 class="md-card-title">Snow Day Prediction</h2>
+        </div>
+        <div class="md-card-content">
+            <p id="predictionText">Click "Calculate" to see your snow day prediction.</p>
         </div>
     </div>
 
-    <div class="settings-section">
-        <div class="settings-section-header">About</div>
-        <div class="settings-item">
-            <div class="settings-item-title">Privacy Policy</div>
-            <div class="settings-item-right">
-                <a href="https://declan-wright.github.io/snowday-privacy-policy/" target="_blank" class="external-link">
-                    <span class="material-icons-round">open_in_new</span>
-                </a>
+    <!-- Bottom Section -->
+    <div id="bottomSection" class="bottom-section">
+        <img src="https://www.pressherald.com/wp-content/uploads/sites/4/2011/04/m-bath-rsu1-superintendent-patrick-manuel.jpg" alt="Patrick Manuel" class="avatar">
+        <p class="footer-message">Please, Patrick! We need a break!</p>
+    </div>
+
+    <!-- Snowflakes -->
+    <div id="snowflakes" class="snowflakes" aria-hidden="true"></div>
+
+    <!-- Settings FAB -->
+    <button id="settingsButton" class="fab">
+        <span class="material-symbols-rounded">settings</span>
+    </button>
+
+    <!-- Bottom Sheet Overlay -->
+    <div id="settingsOverlay" class="sheet-overlay"></div>
+
+    <!-- Settings Bottom Sheet -->
+    <div id="settingsSheet" class="bottom-sheet">
+        <div class="sheet-header">
+            <h2 class="sheet-title">Settings</h2>
+            <button class="close-button" id="closeSettings">Done</button>
+        </div>
+
+        <div class="settings-section">
+            <div class="settings-section-header">Appearance</div>
+            <div class="settings-item" id="darkModeItem">
+                <div class="settings-item-title">Dark Theme</div>
+                <div class="settings-item-right">
+                    <label class="md-switch">
+                        <input type="checkbox" id="darkModeToggle">
+                        <span class="switch-track"></span>
+                    </label>
+                </div>
+            </div>
+            <div class="settings-item" id="materialThemingItem">
+                <div class="settings-item-title">Material You Theming</div>
+                <div class="settings-item-right">
+                    <label class="md-switch">
+                        <input type="checkbox" id="materialThemingToggle" checked>
+                        <span class="switch-track"></span>
+                    </label>
+                </div>
             </div>
         </div>
-        <div class="settings-item">
-            <div class="settings-item-title">Version</div>
-            <div class="settings-item-right">
-                <span class="settings-version">1.0.0</span>
+
+        <div class="settings-section">
+            <div class="settings-section-header">Share</div>
+            <div class="settings-item">
+                <div class="settings-item-title">Share Snow Day Calculator</div>
+                <div class="settings-item-right">
+                    <button class="share-button" id="shareButton">
+                        <span class="material-symbols-rounded">share</span>
+                    </button>
+                </div>
             </div>
         </div>
-        <div class="settings-item">
-            <div class="settings-item-title">Bundle ID</div>
-            <div class="settings-item-right">
-                <span class="settings-bundle">com.snowdaycalculator</span>
+
+        <div class="settings-section">
+            <div class="settings-section-header">About</div>
+            <div class="settings-item">
+                <div class="settings-item-title">Privacy Policy</div>
+                <div class="settings-item-right">
+                    <a href="https://declan-wright.github.io/snowday-privacy-policy/" class="share-button">
+                        <span class="material-symbols-outlined" style="font-size: 15px; margin-bottom: 0; font-variation-settings: 'FILL' 0;">open_in_new</span>
+                    </a>
+                </div>
+            </div>
+            <div class="settings-item">
+                <div class="settings-item-title">Version</div>
+                <div class="settings-item-right">
+                    <span class="settings-version">1.0.0</span>
+                </div>
+            </div>
+            <div class="settings-item">
+                <div class="settings-item-title">Bundle ID</div>
+                <div class="settings-item-right">
+                    <span class="settings-bundle">com.snowdaycalculator</span>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
+<!-- Material Components Web JavaScript -->
+<script src="https://unpkg.com/material-components-web@14.0.0/dist/material-components-web.min.js"></script>
 <script>
+    // Helper function to handle Android color integration
+    function initializeTheme() {
+        // Check if the Android JS bridge is available
+        if (typeof Android !== 'undefined' && Android.isDarkMode) {
+            const isDarkMode = Android.isDarkMode();
+            if (isDarkMode) {
+                document.body.setAttribute('data-theme', 'dark');
+                if (darkModeToggle) darkModeToggle.checked = true;
+            }
+        } else {
+            // Fallback to saved preference
+            const savedDarkMode = localStorage.getItem("darkMode") === "true";
+            if (savedDarkMode) {
+                document.body.setAttribute('data-theme', 'dark');
+                if (darkModeToggle) darkModeToggle.checked = true;
+            }
+        }
+
+        // Try to get system colors if available
+        if (typeof Android !== 'undefined' && Android.getSystemColors) {
+            try {
+                const colorJson = Android.getSystemColors();
+                if (colorJson) {
+                    const colors = JSON.parse(colorJson);
+                    applySystemColors(colors);
+                }
+            } catch (e) {
+                console.error('Error applying system colors:', e);
+            }
+        }
+    }
+
+    function applySystemColors(colors) {
+        // Apply Material You dynamic colors if available
+        const root = document.documentElement;
+        if (colors.primary) root.style.setProperty('--md-sys-color-primary', colors.primary);
+        if (colors.onPrimary) root.style.setProperty('--md-sys-color-on-primary', colors.onPrimary);
+        if (colors.primaryContainer) root.style.setProperty('--md-sys-color-primary-container', colors.primaryContainer);
+        if (colors.onPrimaryContainer) root.style.setProperty('--md-sys-color-on-primary-container', colors.onPrimaryContainer);
+        if (colors.secondary) root.style.setProperty('--md-sys-color-secondary', colors.secondary);
+        if (colors.onSecondary) root.style.setProperty('--md-sys-color-on-secondary', colors.onSecondary);
+        if (colors.secondaryContainer) root.style.setProperty('--md-sys-color-secondary-container', colors.secondaryContainer);
+        if (colors.onSecondaryContainer) root.style.setProperty('--md-sys-color-on-secondary-container', colors.onSecondaryContainer);
+
+        // Update RGB version of primary for ripple effects
+        const primaryRgb = hexToRgb(colors.primary || '#8b5000');
+        if (primaryRgb) {
+            root.style.setProperty('--md-sys-color-primary-rgb', `${primaryRgb.r}, ${primaryRgb.g}, ${primaryRgb.b}`);
+        }
+    }
+
+    function hexToRgb(hex) {
+        // Remove # if present
+        hex = hex.replace(/^#/, '');
+
+        // Parse hex to RGB
+        const bigint = parseInt(hex, 16);
+        return {
+            r: (bigint >> 16) & 255,
+            g: (bigint >> 8) & 255,
+            b: bigint & 255
+        };
+    }
+
     // Patch fetch to provide better error reporting
     const originalFetch = window.fetch;
     window.fetch = function(...args) {
@@ -1044,6 +1188,8 @@
     const weatherDataSection = document.getElementById("weatherData");
     const predictionSection = document.getElementById("prediction");
     const darkModeToggle = document.getElementById("darkModeToggle");
+    const darkModeItem = document.getElementById("darkModeItem");
+    const materialThemingToggle = document.getElementById("materialThemingToggle");
     const settingsButton = document.getElementById("settingsButton");
     const settingsSheet = document.getElementById("settingsSheet");
     const settingsOverlay = document.getElementById("settingsOverlay");
@@ -1063,15 +1209,15 @@
     // Create snowflakes
     createSnowflakes();
 
-    // Check for saved dark mode preference
-    if (localStorage.getItem("darkMode") === "true") {
-      document.body.classList.add("dark-mode");
-      darkModeToggle.checked = true;
-    }
+    // Initialize theme
+    initializeTheme();
 
     // Add event listeners
     calculateButton.addEventListener("click", handleCalculateClick);
     darkModeToggle.addEventListener("change", toggleDarkMode);
+    darkModeItem.addEventListener("click", toggleDarkModeFromItem);
+    materialThemingToggle.addEventListener("change", toggleMaterialTheming);
+    document.getElementById("materialThemingItem").addEventListener("click", toggleMaterialThemingFromItem);
     settingsButton.addEventListener("click", openSettings);
     closeSettings.addEventListener("click", closeSettingsSheet);
     settingsOverlay.addEventListener("click", closeSettingsSheet);
@@ -1122,13 +1268,57 @@
       }
     }, false);
 
-    // Add haptic feedback
-    if (window.navigator && window.navigator.vibrate) {
-      const elements = document.querySelectorAll("button, .condition-group, .toggle-switch");
-      elements.forEach(el => {
-        el.addEventListener("click", () => window.navigator.vibrate(10));
-      });
+    // Add ripple effect for buttons
+    function createRipple(event) {
+      const button = event.currentTarget;
+
+      // Skip if the element already has an active ripple
+      if (button.querySelector('.ripple')) return;
+
+      const circle = document.createElement('span');
+      const diameter = Math.max(button.clientWidth, button.clientHeight);
+      const radius = diameter / 2;
+
+      // Get position
+      let rect = button.getBoundingClientRect();
+      let x, y;
+
+      if (event.type === 'touchstart') {
+        x = event.touches[0].clientX - rect.left;
+        y = event.touches[0].clientY - rect.top;
+      } else {
+        x = event.clientX - rect.left;
+        y = event.clientY - rect.top;
+      }
+
+      circle.style.width = circle.style.height = `${diameter}px`;
+      circle.style.left = `${x - radius}px`;
+      circle.style.top = `${y - radius}px`;
+      circle.classList.add('ripple');
+
+      // Style the ripple
+      circle.style.position = 'absolute';
+      circle.style.borderRadius = '50%';
+      circle.style.transform = 'scale(0)';
+      circle.style.animation = 'ripple 0.6s linear';
+      circle.style.backgroundColor = 'rgba(255, 255, 255, 0.3)';
+      circle.style.pointerEvents = 'none';
+
+      // Add the ripple and handle removal
+      button.appendChild(circle);
+
+      setTimeout(() => {
+        if (circle) {
+          circle.remove();
+        }
+      }, 600);
     }
+
+    // Add ripple to interactive elements, but not to FAB
+    document.querySelectorAll('.md-button, .settings-item, .close-button').forEach(el => {
+      el.addEventListener('touchstart', createRipple, {passive: true});
+      el.addEventListener('mousedown', createRipple);
+    });
 
     // Helper functions
     function sigmoid(z) {
@@ -1140,7 +1330,7 @@
     }
 
     function formatDate(date) {
-      return new Intl.DateTimeFormat("en-US", { weekday: "long", month: "short", day: "numeric" }).format(date);
+      return new Intl.DateTimeFormat("en-US", { weekday: "long" }).format(date);
     }
 
     function calculateMLPSnowDayProbability(snowfall, prevSnow, minTemp) {
@@ -1221,13 +1411,61 @@
     }
 
     function toggleDarkMode() {
-      document.body.classList.toggle("dark-mode");
-      const isDarkMode = document.body.classList.contains("dark-mode");
+      const isDarkMode = darkModeToggle.checked;
+
+      if (isDarkMode) {
+        document.body.setAttribute('data-theme', 'dark');
+      } else {
+        document.body.removeAttribute('data-theme');
+      }
+
       localStorage.setItem("darkMode", isDarkMode);
 
+      // Notify Android of theme change if the bridge is available
+      if (typeof Android !== 'undefined' && Android.setDarkMode) {
+        Android.setDarkMode(isDarkMode);
+      }
+
       // Add haptic feedback
-      if (window.navigator && window.navigator.vibrate) {
+      if (typeof Android !== 'undefined' && Android.vibrate) {
+        Android.vibrate(15);
+      } else if (window.navigator && window.navigator.vibrate) {
         window.navigator.vibrate(15);
+      }
+    }
+
+    function toggleDarkModeFromItem(event) {
+      // If not clicking directly on the toggle, toggle it programmatically
+      if (!event.target.closest('.md-switch')) {
+        darkModeToggle.checked = !darkModeToggle.checked;
+        toggleDarkMode();
+      }
+    }
+
+    function toggleMaterialTheming() {
+      const isMaterialThemingOn = materialThemingToggle.checked;
+
+      if (isMaterialThemingOn) {
+        document.body.removeAttribute('data-material-theming');
+      } else {
+        document.body.setAttribute('data-material-theming', 'off');
+      }
+
+      localStorage.setItem("materialTheming", isMaterialThemingOn);
+
+      // Add haptic feedback
+      if (typeof Android !== 'undefined' && Android.vibrate) {
+        Android.vibrate(15);
+      } else if (window.navigator && window.navigator.vibrate) {
+        window.navigator.vibrate(15);
+      }
+    }
+
+    function toggleMaterialThemingFromItem(event) {
+      // If not clicking directly on the toggle, toggle it programmatically
+      if (!event.target.closest('.md-switch')) {
+        materialThemingToggle.checked = !materialThemingToggle.checked;
+        toggleMaterialTheming();
       }
     }
 
@@ -1236,7 +1474,9 @@
       settingsSheet.classList.add("active");
 
       // Add haptic feedback
-      if (window.navigator && window.navigator.vibrate) {
+      if (typeof Android !== 'undefined' && Android.vibrate) {
+        Android.vibrate([10, 30, 10]);
+      } else if (window.navigator && window.navigator.vibrate) {
         window.navigator.vibrate([10, 30, 10]);
       }
     }
@@ -1246,14 +1486,16 @@
       settingsSheet.classList.remove("active");
 
       // Add haptic feedback
-      if (window.navigator && window.navigator.vibrate) {
+      if (typeof Android !== 'undefined' && Android.vibrate) {
+        Android.vibrate(10);
+      } else if (window.navigator && window.navigator.vibrate) {
         window.navigator.vibrate(10);
       }
     }
 
     function shareApp() {
       // Check if running in Android WebView
-      if (typeof Android !== 'undefined') {
+      if (typeof Android !== 'undefined' && Android.shareContent) {
         try {
           Android.shareContent(
             'RSU1 Snow Day Calculator',
@@ -1378,11 +1620,13 @@
         // Show weather data section with animation
         weatherDataSection.classList.add("show");
 
-        // Update prediction section
+        // Update prediction section with Material Design layout
         predictionText.innerHTML = `
-          <div id="gauge">
-            <div id="gauge-fill"></div>
-            <div id="gauge-text">${probabilityPercentage}%</div>
+          <div class="gauge-container">
+            <div class="gauge-value">${probabilityPercentage}%</div>
+            <div class="gauge">
+              <div class="gauge-fill" id="gaugeFill"></div>
+            </div>
           </div>
           <div class="prediction-result">
             <div class="prediction-header">Snow Day Predicted: <strong>${prediction}</strong></div>
@@ -1395,18 +1639,18 @@
 
         // Animate gauge fill after a small delay
         setTimeout(() => {
-          document.getElementById("gauge-fill").style.width = probabilityPercentage + "%";
+          document.getElementById("gaugeFill").style.width = probabilityPercentage + "%";
         }, 300);
 
       } catch (error) {
         console.error("Error fetching weather data:", error);
 
-        // Show error in prediction section
+        // Show error in prediction section with Material Design
         predictionText.innerHTML = `
-          <div style="text-align: center; padding: 20px;">
-            <span class="material-icons-round" style="font-size: 48px; color: #e57373; margin-bottom: 16px;">error_outline</span>
-            <p style="margin-bottom: 12px; font-weight: 600;">Unable to load weather data</p>
-            <p style="color: var(--non-heading-text);">Please check your connection and try again.</p>
+          <div style="text-align: center; padding: 24px;">
+            <span class="material-symbols-rounded" style="font-size: 48px; color: var(--md-sys-color-error); margin-bottom: 16px;">error</span>
+            <p style="margin-bottom: 12px; font-weight: 500; color: var(--md-sys-color-on-surface);">Unable to load weather data</p>
+            <p style="color: var(--md-sys-color-on-surface-variant);">Please check your connection and try again.</p>
           </div>
         `;
 
@@ -1416,98 +1660,21 @@
       }
     }
 
-    // Add ripple effect for interactive elements
+    // Initialize ripple animations for a more Material feel
     document.addEventListener('DOMContentLoaded', function() {
-      // Add touch response for buttons and interactive elements
-      document.querySelectorAll('button, .condition-group, .settings-done, .settings-item').forEach(button => {
-        button.addEventListener('touchstart', createRipple);
-        button.addEventListener('mousedown', createRipple);
-      });
-
-      function createRipple(event) {
-        const button = event.currentTarget;
-
-        // Skip if the element already has an active ripple
-        if (button.querySelector('.ripple')) return;
-
-        const circle = document.createElement('span');
-        const diameter = Math.max(button.clientWidth, button.clientHeight);
-        const radius = diameter / 2;
-
-        // Get position
-        let rect = button.getBoundingClientRect();
-        let x, y;
-
-        if (event.type === 'touchstart') {
-          x = event.touches[0].clientX - rect.left;
-          y = event.touches[0].clientY - rect.top;
-        } else {
-          x = event.clientX - rect.left;
-          y = event.clientY - rect.top;
-        }
-
-        circle.style.width = circle.style.height = `${diameter}px`;
-        circle.style.left = `${x - radius}px`;
-        circle.style.top = `${y - radius}px`;
-        circle.classList.add('ripple');
-
-        // Style the ripple
-        circle.style.position = 'absolute';
-        circle.style.borderRadius = '50%';
-        circle.style.transform = 'scale(0)';
-        circle.style.animation = 'ripple 0.6s linear';
-        circle.style.backgroundColor = button.classList.contains('settings-item') ?
-                                      'rgba(218, 124, 93, 0.15)' : 'rgba(255, 255, 255, 0.7)';
-        circle.style.pointerEvents = 'none';
-        circle.style.zIndex = '0';
-
-        // Add the ripple and handle removal
-        button.appendChild(circle);
-
-        setTimeout(() => {
-          if (circle) {
-            circle.remove();
+      // Add keyframes for ripple animation if not already present
+      if (!document.querySelector('#ripple-animation')) {
+        const style = document.createElement('style');
+        style.id = 'ripple-animation';
+        style.textContent = `
+          @keyframes ripple {
+            to {
+              transform: scale(4);
+              opacity: 0;
+            }
           }
-        }, 600);
-      }
-
-      // Add ripple animation to stylesheet
-      const style = document.createElement('style');
-      style.textContent = `
-        @keyframes ripple {
-          to {
-            transform: scale(4);
-            opacity: 0;
-          }
-        }
-
-        /* Add hover state for interactive elements */
-        .settings-item:hover {
-          background-color: rgba(218, 124, 93, 0.08);
-        }
-
-        /* Make toggle switch container handle ripples */
-        .toggle-switch {
-          position: relative;
-          z-index: 2;
-        }
-      `;
-      document.head.appendChild(style);
-
-      // Special handler for the dark mode toggle section
-      const darkModeItem = document.querySelector('.settings-item:has(.toggle-switch)');
-      if (darkModeItem) {
-        darkModeItem.addEventListener('click', function(e) {
-          // If not clicking directly on the toggle, toggle it programmatically
-          if (!e.target.closest('.toggle-switch')) {
-            const toggle = this.querySelector('input[type="checkbox"]');
-            toggle.checked = !toggle.checked;
-
-            // Trigger the change event to update dark mode
-            const event = new Event('change');
-            toggle.dispatchEvent(event);
-          }
-        });
+        `;
+        document.head.appendChild(style);
       }
     });
 </script>
