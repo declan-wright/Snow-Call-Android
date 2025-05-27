@@ -1026,6 +1026,9 @@
 <!-- Material Components Web JavaScript -->
 <script src="https://unpkg.com/material-components-web@14.0.0/dist/material-components-web.min.js"></script>
 <script>
+    /*----------------------------------------------------
+      Material You Integration & Theme Management
+    ----------------------------------------------------*/
     // Helper function to handle Android color integration
     function initializeTheme() {
         // Check if the Android JS bridge is available
@@ -1044,6 +1047,15 @@
             }
         }
 
+        // Check if material theming should be enabled
+        const savedMaterialTheming = localStorage.getItem("materialTheming") !== "false"; // Default to true
+        if (!savedMaterialTheming) {
+            document.body.setAttribute('data-material-theming', 'off');
+            if (materialThemingToggle) materialThemingToggle.checked = false;
+        } else if (materialThemingToggle) {
+            materialThemingToggle.checked = true;
+        }
+
         // Try to get system colors if available
         if (typeof Android !== 'undefined' && Android.getSystemColors) {
             try {
@@ -1053,44 +1065,175 @@
                     applySystemColors(colors);
                 }
             } catch (e) {
-                console.error('Error applying system colors:', e);
+                console.error('Error applying system colors during initialization:', e);
             }
         }
     }
 
-    function applySystemColors(colors) {
-        // Apply Material You dynamic colors if available
-        const root = document.documentElement;
-        if (colors.primary) root.style.setProperty('--md-sys-color-primary', colors.primary);
-        if (colors.onPrimary) root.style.setProperty('--md-sys-color-on-primary', colors.onPrimary);
-        if (colors.primaryContainer) root.style.setProperty('--md-sys-color-primary-container', colors.primaryContainer);
-        if (colors.onPrimaryContainer) root.style.setProperty('--md-sys-color-on-primary-container', colors.onPrimaryContainer);
-        if (colors.secondary) root.style.setProperty('--md-sys-color-secondary', colors.secondary);
-        if (colors.onSecondary) root.style.setProperty('--md-sys-color-on-secondary', colors.onSecondary);
-        if (colors.secondaryContainer) root.style.setProperty('--md-sys-color-secondary-container', colors.secondaryContainer);
-        if (colors.onSecondaryContainer) root.style.setProperty('--md-sys-color-on-secondary-container', colors.onSecondaryContainer);
-
-        // Update RGB version of primary for ripple effects
-        const primaryRgb = hexToRgb(colors.primary || '#8b5000');
-        if (primaryRgb) {
-            root.style.setProperty('--md-sys-color-primary-rgb', `${primaryRgb.r}, ${primaryRgb.g}, ${primaryRgb.b}`);
-        }
-    }
-
+    // Function to convert hex color to RGB components
     function hexToRgb(hex) {
+        if (!hex) return { r: 0, g: 0, b: 0 };
+
         // Remove # if present
         hex = hex.replace(/^#/, '');
 
-        // Parse hex to RGB
-        const bigint = parseInt(hex, 16);
-        return {
-            r: (bigint >> 16) & 255,
-            g: (bigint >> 8) & 255,
-            b: bigint & 255
-        };
+        // Parse hex string to RGB
+        let r, g, b;
+        if (hex.length === 3) {
+            // Short notation like #FFF
+            r = parseInt(hex.charAt(0) + hex.charAt(0), 16);
+            g = parseInt(hex.charAt(1) + hex.charAt(1), 16);
+            b = parseInt(hex.charAt(2) + hex.charAt(2), 16);
+        } else if (hex.length === 6) {
+            // Standard notation like #FFFFFF
+            r = parseInt(hex.substring(0, 2), 16);
+            g = parseInt(hex.substring(2, 4), 16);
+            b = parseInt(hex.substring(4, 6), 16);
+        } else {
+            console.error("Invalid hex color format:", hex);
+            return { r: 0, g: 0, b: 0 };
+        }
+
+        return { r, g, b };
     }
 
-    // Patch fetch to provide better error reporting
+    // Function to apply system colors to CSS variables
+    function applySystemColors(colors) {
+        console.log('Applying system colors:', colors);
+
+        if (!colors) {
+            console.error('No colors provided to applySystemColors');
+            return;
+        }
+
+        // Check if Material Theming is disabled
+        if (document.body.getAttribute('data-material-theming') === 'off') {
+            console.log('Material Theming is disabled, not applying system colors');
+            return;
+        }
+
+        // Apply Material You dynamic colors
+        const root = document.documentElement;
+
+        // Primary colors
+        if (colors.primary) {
+            console.log('Setting primary color to:', colors.primary);
+            root.style.setProperty('--md-sys-color-primary', colors.primary);
+        }
+
+        if (colors.onPrimary) root.style.setProperty('--md-sys-color-on-primary', colors.onPrimary);
+        if (colors.primaryContainer) root.style.setProperty('--md-sys-color-primary-container', colors.primaryContainer);
+        if (colors.onPrimaryContainer) root.style.setProperty('--md-sys-color-on-primary-container', colors.onPrimaryContainer);
+
+        // Secondary colors (use primary if secondary not provided)
+        if (colors.secondary) {
+            root.style.setProperty('--md-sys-color-secondary', colors.secondary);
+        } else if (colors.primary) {
+            root.style.setProperty('--md-sys-color-secondary', colors.primary);
+        }
+
+        if (colors.onSecondary) {
+            root.style.setProperty('--md-sys-color-on-secondary', colors.onSecondary);
+        } else if (colors.onPrimary) {
+            root.style.setProperty('--md-sys-color-on-secondary', colors.onPrimary);
+        }
+
+        if (colors.secondaryContainer) {
+            root.style.setProperty('--md-sys-color-secondary-container', colors.secondaryContainer);
+        } else if (colors.primaryContainer) {
+            root.style.setProperty('--md-sys-color-secondary-container', colors.primaryContainer);
+        }
+
+        if (colors.onSecondaryContainer) {
+            root.style.setProperty('--md-sys-color-on-secondary-container', colors.onSecondaryContainer);
+        } else if (colors.onPrimaryContainer) {
+            root.style.setProperty('--md-sys-color-on-secondary-container', colors.onPrimaryContainer);
+        }
+
+        // Tertiary colors
+        if (colors.tertiary) root.style.setProperty('--md-sys-color-tertiary', colors.tertiary);
+        if (colors.onTertiary) root.style.setProperty('--md-sys-color-on-tertiary', colors.onTertiary);
+        if (colors.tertiaryContainer) {
+            root.style.setProperty('--md-sys-color-tertiary-container', colors.tertiaryContainer);
+        } else if (colors.tertiary) {
+            // If tertiaryContainer isn't available, derive it from tertiary
+            const rgb = hexToRgb(colors.tertiary);
+            const lighterColor = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.2)`;
+            root.style.setProperty('--md-sys-color-tertiary-container', lighterColor);
+        }
+
+        if (colors.onTertiaryContainer) {
+            root.style.setProperty('--md-sys-color-on-tertiary-container', colors.onTertiaryContainer);
+        } else if (colors.onTertiary) {
+            root.style.setProperty('--md-sys-color-on-tertiary-container', colors.onTertiary);
+        }
+
+        // Surface colors
+        if (colors.surface) root.style.setProperty('--md-sys-color-surface', colors.surface);
+        if (colors.onSurface) root.style.setProperty('--md-sys-color-on-surface', colors.onSurface);
+        if (colors.surfaceVariant) root.style.setProperty('--md-sys-color-surface-variant', colors.surfaceVariant);
+        if (colors.onSurfaceVariant) root.style.setProperty('--md-sys-color-on-surface-variant', colors.onSurfaceVariant);
+
+        // Background colors (typically same as surface)
+        if (colors.surface) root.style.setProperty('--md-sys-color-background', colors.surface);
+        if (colors.onSurface) root.style.setProperty('--md-sys-color-on-background', colors.onSurface);
+
+        // Surface container
+        if (colors.surfaceContainer) {
+            root.style.setProperty('--md-sys-color-surface-container', colors.surfaceContainer);
+        } else if (colors.surface) {
+            root.style.setProperty('--md-sys-color-surface-container', colors.surface);
+        }
+
+        // Other colors
+        if (colors.outline) root.style.setProperty('--md-sys-color-outline', colors.outline);
+        if (colors.outlineVariant) {
+            root.style.setProperty('--md-sys-color-outline-variant', colors.outlineVariant);
+        } else if (colors.outline) {
+            // Derive outlineVariant from outline if not provided
+            const rgb = hexToRgb(colors.outline);
+            const lighterColor = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.5)`;
+            root.style.setProperty('--md-sys-color-outline-variant', lighterColor);
+        }
+
+        // Status bar background - make it semi-transparent
+        const statusBarColor = colors.surface || (document.body.getAttribute('data-theme') === 'dark' ? '#1f1b16' : '#fffbff');
+        const rgbStatus = hexToRgb(statusBarColor);
+        root.style.setProperty('--md-sys-color-status-bar', `rgba(${rgbStatus.r}, ${rgbStatus.g}, ${rgbStatus.b}, 0.95)`);
+
+        // Update RGB version of primary for ripple effects
+        if (colors.primary) {
+            const primaryRgb = hexToRgb(colors.primary);
+            if (primaryRgb) {
+                root.style.setProperty('--md-sys-color-primary-rgb', `${primaryRgb.r}, ${primaryRgb.g}, ${primaryRgb.b}`);
+            }
+        }
+
+        console.log('System colors applied successfully');
+
+        // Force a subtle redraw to ensure colors apply
+        document.body.style.opacity = 0.99;
+        setTimeout(() => {
+            document.body.style.opacity = 1;
+        }, 50);
+
+        // Update UI elements visibility now that colors are applied
+        setTimeout(() => {
+            // Make UI elements visible now that colors are applied
+            const cards = document.querySelectorAll('.md-card');
+            cards.forEach(card => card.classList.add('show'));
+
+            const dateDisplay = document.getElementById('dateDisplay');
+            if (dateDisplay) dateDisplay.classList.add('show');
+        }, 300);
+    }
+
+    // Make the applySystemColors function globally available
+    window.applySystemColors = applySystemColors;
+
+    /*----------------------------------------------------
+      Patch fetch for better error reporting
+    ----------------------------------------------------*/
     const originalFetch = window.fetch;
     window.fetch = function(...args) {
       console.log('Fetch request to:', args[0]);
@@ -1112,7 +1255,9 @@
         });
     };
 
-    // Add a global error handler
+    /*----------------------------------------------------
+      Global Error Handler
+    ----------------------------------------------------*/
     window.onerror = function(message, source, lineno, colno, error) {
       console.error('Global error:', message, 'at', source, lineno, colno);
       // If Android interface exists, show error
@@ -1122,7 +1267,9 @@
       return false;
     };
 
-    // Check network connectivity explicitly
+    /*----------------------------------------------------
+      Network Connectivity Check
+    ----------------------------------------------------*/
     function checkNetwork() {
       console.log('Checking network connectivity...');
       const testUrl = 'https://api.weather.gov/points/43.915,-69.837222';
@@ -1143,6 +1290,9 @@
       });
     }
 
+    /*----------------------------------------------------
+      Snow Day Calculation Model
+    ----------------------------------------------------*/
     // Model weights from Snowday Model F2 0.912.json
     const weights = {
       W1: [
@@ -1176,7 +1326,10 @@
       optimal_threshold: 0.444443502330337
     };
 
-    // Initialize elements
+    /*----------------------------------------------------
+      Initialize Elements
+    ----------------------------------------------------*/
+    // Get UI elements
     const calculateButton = document.getElementById("calculateButton");
     const buttonText = document.getElementById("buttonText");
     const loadingSpinner = document.getElementById("loadingSpinner");
@@ -1204,15 +1357,17 @@
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
     dateDisplay.innerHTML = `Calculating for <strong>${formatDate(tomorrow)}</strong>`;
-    dateDisplay.classList.add("show");
 
-    // Create snowflakes
+    // Create snowflakes animation
     createSnowflakes();
 
-    // Initialize theme
+    // Initialize theme and check for colors
     initializeTheme();
 
-    // Add event listeners
+    /*----------------------------------------------------
+      Add Event Listeners
+    ----------------------------------------------------*/
+    // Main functionality
     calculateButton.addEventListener("click", handleCalculateClick);
     darkModeToggle.addEventListener("change", toggleDarkMode);
     darkModeItem.addEventListener("click", toggleDarkModeFromItem);
@@ -1320,7 +1475,56 @@
       el.addEventListener('mousedown', createRipple);
     });
 
-    // Helper functions
+    // Add the Material You update handler for communication with Android
+    window.updateThemeColors = function() {
+        if (typeof Android !== 'undefined' && Android.getSystemColors) {
+            try {
+                const colorJson = Android.getSystemColors();
+                if (colorJson) {
+                    const colors = JSON.parse(colorJson);
+                    applySystemColors(colors);
+                }
+            } catch (e) {
+                console.error('Error in updateThemeColors:', e);
+            }
+        }
+    };
+
+    // Setup color system on document ready
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('Document ready, setting up color system');
+
+        // Add keyframes for ripple animation if not already present
+        if (!document.querySelector('#ripple-animation')) {
+            const style = document.createElement('style');
+            style.id = 'ripple-animation';
+            style.textContent = `
+                @keyframes ripple {
+                    to {
+                    transform: scale(4);
+                    opacity: 0;
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+
+        // Check if colors were passed while the page was still loading
+        if (window.systemColorsReady && window.systemColors) {
+            console.log('Found cached system colors, applying now');
+            applySystemColors(window.systemColors);
+            window.systemColorsReady = false;
+        }
+
+        // Show UI elements with animation after initial setup
+        setTimeout(() => {
+            dateDisplay.classList.add("show");
+        }, 200);
+    });
+
+    /*----------------------------------------------------
+      Helper Functions
+    ----------------------------------------------------*/
     function sigmoid(z) {
       return 1 / (1 + Math.exp(-z));
     }
@@ -1426,6 +1630,20 @@
         Android.setDarkMode(isDarkMode);
       }
 
+      // Ask for updated Material You colors that match the current theme
+      if (document.body.getAttribute('data-material-theming') !== 'off' &&
+          typeof Android !== 'undefined' && Android.getSystemColors) {
+        try {
+            const colorJson = Android.getSystemColors();
+            if (colorJson) {
+                const colors = JSON.parse(colorJson);
+                applySystemColors(colors);
+            }
+        } catch (e) {
+            console.error('Error updating colors after theme change:', e);
+        }
+      }
+
       // Add haptic feedback
       if (typeof Android !== 'undefined' && Android.vibrate) {
         Android.vibrate(15);
@@ -1447,8 +1665,23 @@
 
       if (isMaterialThemingOn) {
         document.body.removeAttribute('data-material-theming');
+
+        // If Android interface exists, get system colors and apply them
+        if (typeof Android !== 'undefined' && Android.getSystemColors) {
+            try {
+                console.log('Getting system colors after enabling Material Theming');
+                const colorJson = Android.getSystemColors();
+                if (colorJson) {
+                    const colors = JSON.parse(colorJson);
+                    applySystemColors(colors);
+                }
+            } catch (e) {
+                console.error('Error applying system colors:', e);
+            }
+        }
       } else {
         document.body.setAttribute('data-material-theming', 'off');
+        console.log('Material theming turned off');
       }
 
       localStorage.setItem("materialTheming", isMaterialThemingOn);
@@ -1660,23 +1893,14 @@
       }
     }
 
-    // Initialize ripple animations for a more Material feel
-    document.addEventListener('DOMContentLoaded', function() {
-      // Add keyframes for ripple animation if not already present
-      if (!document.querySelector('#ripple-animation')) {
-        const style = document.createElement('style');
-        style.id = 'ripple-animation';
-        style.textContent = `
-          @keyframes ripple {
-            to {
-              transform: scale(4);
-              opacity: 0;
-            }
-          }
-        `;
-        document.head.appendChild(style);
-      }
-    });
+    // If system colors were set before page loaded, apply them now
+    if (window.systemColorsReady && window.systemColors) {
+        console.log("Found system colors set before script loaded, applying now");
+        setTimeout(() => {
+            applySystemColors(window.systemColors);
+            window.systemColorsReady = false;
+        }, 100);
+    }
 </script>
 </body>
 </html>

@@ -1,12 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Primary brand color palette -->
     <color name="primary">#da7c5d</color>
     <color name="primary_variant">#c06548</color>
+    <color name="on_primary">#FFFFFF</color>
+
+    <!-- Secondary color palette (matching primary for coherence) -->
     <color name="secondary">#da7c5d</color>
     <color name="secondary_variant">#c06548</color>
+    <color name="on_secondary">#FFFFFF</color>
+
+    <!-- Tertiary color palette -->
+    <color name="tertiary">#5d6237</color>
+    <color name="tertiary_variant">#404423</color>
+    <color name="on_tertiary">#FFFFFF</color>
+
+    <!-- Common colors -->
     <color name="black">#000000</color>
     <color name="white">#FFFFFF</color>
+
+    <!-- Light theme specific colors -->
     <color name="background_light">#f0efe7</color>
+    <color name="surface_light">#FFFFFF</color>
     <color name="text_primary">#3d3929</color>
     <color name="text_secondary">#98958e</color>
+
+    <!-- Dark theme specific colors -->
+    <color name="background_dark">#272726</color>
+    <color name="surface_dark">#3e3d3a</color>
+    <color name="text_primary_dark">#e2e2df</color>
+    <color name="text_secondary_dark">#98958e</color>
+
+    <!-- Error states -->
+    <color name="error">#b3261e</color>
+    <color name="on_error">#ffffff</color>
+
+    <!-- System bars -->
+    <color name="status_bar_light">#f0efe7</color>
+    <color name="status_bar_dark">#1f1b16</color>
+    <color name="nav_bar_light">#f0efe7</color>
+    <color name="nav_bar_dark">#1f1b16</color>
 </resources>

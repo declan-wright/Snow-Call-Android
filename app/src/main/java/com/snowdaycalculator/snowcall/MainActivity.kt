@@ -4,7 +4,9 @@ import android.annotation.SuppressLint
 import android.graphics.Color
 import android.net.http.SslError
 import android.os.Bundle
+import android.util.Log
 import android.webkit.ConsoleMessage
+import android.webkit.JavascriptInterface
 import android.webkit.SslErrorHandler
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceError
@@ -16,7 +18,6 @@ import android.webkit.WebViewClient
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
@@ -27,13 +28,21 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var webView: WebView
     private lateinit var swipeRefreshLayout: SwipeRefreshLayout
+    private var initialColorInjectionDone = false
+    private val TAG = "MainActivity"
 
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         // Apply dynamic colors if available (Material You)
-        DynamicColors.applyToActivityIfAvailable(this)
+        // This must be called before setContentView
+        if (DynamicColors.isDynamicColorAvailable()) {
+            Log.d(TAG, "Applying dynamic colors to activity")
+            DynamicColors.applyToActivityIfAvailable(this)
+        } else {
+            Log.d(TAG, "Dynamic colors not available on this device")
+        }
 
         // Set up edge-to-edge display
         setupEdgeToEdgeDisplay()
@@ -48,6 +57,26 @@ class MainActivity : AppCompatActivity() {
         swipeRefreshLayout.setColorSchemeResources(R.color.primary)
         swipeRefreshLayout.setProgressBackgroundColorSchemeColor(Color.TRANSPARENT)
 
+        // Configure WebView with enhanced settings
+        setupWebView()
+
+        // Handle back button presses with the new OnBackPressedCallback
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (webView.canGoBack()) {
+                    webView.goBack()
+                } else {
+                    finish()
+                }
+            }
+        })
+
+        // Load HTML from assets
+        loadSnowCalculator()
+    }
+
+    @SuppressLint("SetJavaScriptEnabled")
+    private fun setupWebView() {
         // Configure WebView with enhanced settings
         webView.settings.apply {
             javaScriptEnabled = true
@@ -70,11 +99,18 @@ class MainActivity : AppCompatActivity() {
         }
 
         // Add JavaScript interface for native features
-        webView.addJavascriptInterface(WebAppInterface(this), "Android")
+        val webAppInterface = WebAppInterface(this)
+        webView.addJavascriptInterface(webAppInterface, "Android")
 
         // Enhanced WebViewClient with detailed error handling
         webView.webViewClient = object : WebViewClient() {
             override fun onPageFinished(view: WebView?, url: String?) {
+                super.onPageFinished(view, url)
+                Log.d(TAG, "WebView page finished loading: $url")
+
+                // When the page finishes loading, inject the system colors
+                injectSystemColors()
+
                 swipeRefreshLayout.isRefreshing = false
             }
 
@@ -84,6 +120,7 @@ class MainActivity : AppCompatActivity() {
                 error: WebResourceError?
             ) {
                 val errorMessage = "Network error: ${error?.description}"
+                Log.e(TAG, errorMessage)
                 Toast.makeText(this@MainActivity, errorMessage, Toast.LENGTH_LONG).show()
                 swipeRefreshLayout.isRefreshing = false
             }
@@ -99,6 +136,7 @@ class MainActivity : AppCompatActivity() {
                 request: WebResourceRequest?,
                 errorResponse: WebResourceResponse?
             ) {
+                Log.e(TAG, "HTTP Error: ${errorResponse?.statusCode} for ${request?.url}")
                 Toast.makeText(
                     this@MainActivity,
                     "HTTP Error: ${errorResponse?.statusCode} for ${request?.url}",
@@ -112,7 +150,7 @@ class MainActivity : AppCompatActivity() {
             // Log console messages
             override fun onConsoleMessage(consoleMessage: ConsoleMessage?): Boolean {
                 consoleMessage?.let {
-                    android.util.Log.d(
+                    Log.d(
                         "WebView Console",
                         "${it.message()} -- From line ${it.lineNumber()} of ${it.sourceId()}"
                     )
@@ -123,22 +161,63 @@ class MainActivity : AppCompatActivity() {
 
         // Set up SwipeRefreshLayout
         swipeRefreshLayout.setOnRefreshListener {
+            // Reset the flag when manually refreshing
+            initialColorInjectionDone = false
             webView.reload()
         }
+    }
 
-        // Handle back button presses with the new OnBackPressedCallback
-        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() {
-                if (webView.canGoBack()) {
-                    webView.goBack()
-                } else {
-                    finish()
+    private fun injectSystemColors() {
+        try {
+            // Create an instance of WebAppInterface to get the system colors
+            val webAppInterface = WebAppInterface(this)
+            val colorJson = webAppInterface.getSystemColors()
+
+            Log.d(TAG, "Injecting system colors into WebView")
+
+            // Inject the colors into the WebView
+            val script = """
+                try {
+                    const colors = $colorJson;
+                    console.log('Received system colors from Android:', colors);
+                    if (window.applySystemColors) {
+                        window.applySystemColors(colors);
+                        console.log('Applied system colors directly');
+                    } else {
+                        // If the function doesn't exist yet, wait and try again
+                        console.log('applySystemColors not found, setting up retry');
+                        window.systemColors = colors;
+                        window.systemColorsReady = true;
+                        
+                        // Try again after a delay
+                        setTimeout(() => {
+                            if (window.applySystemColors) {
+                                window.applySystemColors(colors);
+                                console.log('Applied system colors after delay');
+                            } else {
+                                console.error('applySystemColors function not found after waiting');
+                                // Try one more time after a longer delay
+                                setTimeout(() => {
+                                    if (window.applySystemColors) {
+                                        window.applySystemColors(colors);
+                                        console.log('Applied system colors after longer delay');
+                                    }
+                                }, 2000);
+                            }
+                        }, 1000);
+                    }
+                } catch (e) {
+                    console.error('Error applying system colors:', e);
                 }
-            }
-        })
+            """.trimIndent()
 
-        // Load HTML from assets
-        loadSnowCalculator()
+            webView.evaluateJavascript(script) { result ->
+                Log.d(TAG, "Color injection result: $result")
+                initialColorInjectionDone = true
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error injecting colors", e)
+        }
     }
 
     private fun setupEdgeToEdgeDisplay() {
@@ -158,6 +237,17 @@ class MainActivity : AppCompatActivity() {
         // Make status bar and navigation bar transparent
         window.statusBarColor = Color.TRANSPARENT
         window.navigationBarColor = Color.TRANSPARENT
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        // Re-apply colors when the activity resumes
+        // This handles cases where system colors might have changed while the app was in background
+        if (initialColorInjectionDone) {
+            Log.d(TAG, "Activity resumed, re-injecting colors")
+            injectSystemColors()
+        }
     }
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
